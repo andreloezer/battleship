@@ -348,7 +348,11 @@ def start():
                   "number of ships",\
                   "number_of_ships",\
                   "numberofships"):
-    number_of_ships = input_integer("Choose the number of ships", ships_interval[0], ships_interval[1](board_size))
+    if int(ships_interval[1](board_size)) == 1:
+      number_of_ships = 1
+      print ("At the current board size (%d, %d) there can be only one ship.\n" % (board_size[0], board_size[1]))
+    else:
+      number_of_ships = input_integer("Choose the number of ships", ships_interval[0], ships_interval[1](board_size))
     start()
     return
   elif answer in ("d",\
