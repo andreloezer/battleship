@@ -8,24 +8,25 @@
 from random import randint
 from copy import copy
 
-# Default user settings
-#board_size = 5
-board_size = [7, 6]
-debug = False
-number_of_ships = 3
-number_of_players = 2
-ai_players = 1
-randomize_ships = True
-
-# 'Hardcoded' settings
+# Default settings
 default = {
-  "board_size": [7, 6],
+  "board_size": [6, 6],
   "debug": False,
   "number_of_ships": 3,
   "number_of_players": 2,
   "randomize_ships": True,
   "ai_players": 1
   }
+
+# User settings
+board_size = default["board_size"]
+debug = default["debug"]
+number_of_ships = default["number_of_ships"]
+number_of_players = default["number_of_players"]
+ai_players = default["ai_players"]
+randomize_ships = default["randomize_ships"]
+
+# Settings values interval
 size_interval = [3, 15]
 ships_interval = [1, lambda size : ((size[0] + size[1]) / 2) * 0.6]
 players_interval = [2, 8]
@@ -67,8 +68,6 @@ def print_ships(dict):
   print ()
 
 # User input and validation
-# Ensure user input is an integer and is in the given interval
-# Adapted from: http://www.101computing.net/number-only/
 def input_integer(message, min_value, max_value):
   while True:
     try:
@@ -83,7 +82,16 @@ def input_integer(message, min_value, max_value):
       return user_input
       break
 
-# Create ships (ensures no ships on same position)
+# Initializes Guesses boards if don't exist
+def initialize_guesses_boards(player, target):
+      try:
+        player.guesses_boards[target]
+      except KeyError:
+        player.guesses_boards[target] = []
+        for row in range(board_size[1]):
+          player.guesses_boards[target].append(["O"] * board_size[0])
+
+# Create ships, ensuring no ships on same position
 def create_ship(ships_dict, ship_number, is_ai):
   while True:
     if randomize_ships or is_ai:
@@ -141,16 +149,6 @@ def game():
       self.guesses_boards = {}
       self.guess = []
 
-      # Creates guessing board for each of the other players
-      for player in range(number_of_players):
-        self.guesses_boards["Player " + str(player + 1)] = []
-        for row in range(board_size[1]):
-          self.guesses_boards["Player " + str(player + 1)].append(["O"] * board_size[0])
-
-      # Ships board
-      for row in range(board_size[1]):
-        self.ships_board.append(["O"] * board_size[0])
-
       # Creates dictionary of the ships
       if not self.ai and not randomize_ships:
         print ("\n%s position your ships:" % (self.name))
@@ -186,6 +184,8 @@ def game():
             else:
               print ("Choose a valid target")
       print ("Target: %s\n" % self.target)
+
+      initialize_guesses_boards(self, self.target)
       self.player_guess()
       return
 
@@ -229,6 +229,7 @@ def game():
             # There are more ships to be sinked
             else:
               for player in players:
+                initialize_guesses_boards(players[player], self.target)
                 players[player].guesses_boards[self.target][self.guess[0] - 1][self.guess[1] - 1] = "S"
               print ("%s sinked a %s ship!" % (self.name, self.target))
               print ("%s have %d ships left.\n" % (self.target, number_of_ships - players[self.target].ships_sunked))
