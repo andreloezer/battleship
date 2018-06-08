@@ -7,6 +7,7 @@
 
 from random import randint
 from copy import copy
+import time
 
 # Default settings
 default = {
@@ -15,7 +16,8 @@ default = {
   "number_of_ships": 3,
   "number_of_players": 2,
   "randomize_ships": True,
-  "ai_players": 1
+  "ai_players": 1,
+  "timeout": 1
   }
 
 # User settings
@@ -25,6 +27,7 @@ number_of_ships = default["number_of_ships"]
 number_of_players = default["number_of_players"]
 ai_players = default["ai_players"]
 randomize_ships = default["randomize_ships"]
+timeout = default["timeout"]
 space = "  "
 
 # Settings values interval
@@ -32,6 +35,7 @@ size_interval = [3, 15]
 ships_interval = [1, lambda size : ((size[0] + size[1]) / 2) * 0.6]
 players_interval = [2, 8]
 ai_interval = [0, lambda ai : ai - 1]
+time_interval = [0, 5000]
 
 # Print user readable board
 def print_board(board):
@@ -133,6 +137,11 @@ def is_endgame(players):
   else:
     return False
 
+# AI players pause
+def pause(ai):
+  if ai:
+    time.sleep(timeout)
+
 def game():
   print ("\n======= New Game =======\n")
   rounds = 0
@@ -172,7 +181,7 @@ def game():
         else:
           print (space + "Targets available:\n")
           for player in targets:
-            print ("  %s" % (player))
+            print (space * 2 + "%s" % (player))
           print ()
           while True:
             response_target = input(space + "Choose a target: ").lower().capitalize()
@@ -234,6 +243,7 @@ def game():
                 players[player].guesses_boards[self.target][self.guess[0] - 1][self.guess[1] - 1] = "S"
               print (space + "%s sinked a %s ship!" % (self.name, self.target))
               print (space + "%s have %d ships left.\n" % (self.target, number_of_ships - players[self.target].ships_sunked))
+              pause(self.ai)
               self.get_target()
             break
           # Ship already sunked
@@ -253,6 +263,7 @@ def game():
         else:
           self.guesses_boards[self.target][self.guess[0] - 1][self.guess[1] - 1] = "X"
           print (space + "%s missed the shot.\n" % (self.name))
+      pause(self.ai)
 
   # Initialize each Player(class)
   # Human players
@@ -285,6 +296,7 @@ def start():
   global number_of_players
   global randomize_ships
   global ai_players
+  global timeout
   print ("\n========================")
   print ("====== Battleship ======")
   print ("========================\n")
@@ -295,6 +307,7 @@ def start():
   print ("Cheats/Debug (c)        Current: %s" % (debug))
   print ("Randomize ships (r)     Current: %s" % (randomize_ships))
   print ("AI players (a)          Current: %d" % (ai_players))
+  print ("AI pause time (t)       Current: %ss" % (timeout))
   print ("Restore default (d)")
   print ("Exit/Quit (e/q)\n")
   
@@ -385,6 +398,15 @@ def start():
                   "ai_players",\
                   "aiplayers"):
     ai_players = input_integer("Choose the number of AI players", ai_interval[0], ai_interval[1](number_of_players))
+    start()
+    return
+  elif answer in ("t",\
+                  "pause",\
+                  "time",\
+                  "pause time",\
+                  "pause_time",\
+                  "pausetime"):
+    timeout = input_integer("Choose a pause time in miliseconds for AI action", time_interval[0], time_interval[1]) / 1000
     start()
     return
   else:
