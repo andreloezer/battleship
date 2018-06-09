@@ -6,7 +6,7 @@
 
 
 from random import randint
-import time
+from time import sleep
 
 # Default settings
 default = {
@@ -52,10 +52,10 @@ def print_board(board):
     print()
     for row in board:
         if i >= 10:
-            print(space + str(i) + "-  " + "   ".join(row) + "  -" + str(i))
+            print("%s%d-  %s  -%d" % (space, i, "   ".join(row), i))
         else:
-            print(space + " " + str(i) + "-  " + "   ".join(row) + "  -" + str(i))
-            print()
+            print("%s %d-  %s  -%d" % (space, i, "   ".join(row), i))
+        print()
         i += 1
     print(sub_header)
     print(header)
@@ -79,12 +79,16 @@ def print_ships(dict):
 def input_integer(message, min_value, max_value):
     while True:
         try:
-            user_input = int(input(message + " (%d to %d): " % (min_value, max_value)))
+            user_input = int(input("%s (%d to %d): " % (message,
+                                                        min_value,
+                                                        max_value)))
         except ValueError:
-            print(space + "Enter a whole number (integer).")
+            print("%sEnter a whole number (integer)." % (space))
             continue
         if user_input < min_value or user_input > max_value:
-            print(space + "The number must be between %d and %d." % (min_value, max_value))
+            print("%sThe number must be between %d and %d." % (space,
+                                                               min_value,
+                                                               max_value))
             continue
         else:
             return user_input
@@ -110,8 +114,10 @@ def create_ship(ships_dict, ship_number, is_ai):
             col = position[1]
         else:
             print("\n" + space + "Ship %d:" % (ship_number))
-            row = input_integer(space + "Choose Ship %d row" % (ship_number), 1, board_size[1])
-            col = input_integer(space + "Choose Ship %d col" % (ship_number), 1, board_size[0])
+            row = input_integer("%sChoose Ship %d row" % (space, ship_number),
+                                1, board_size[1])
+            col = input_integer("%sChoose Ship %d col" % (space, ship_number),
+                                1, board_size[0])
             position = [row, col]
         if len(ships_dict) == 0:
             return position
@@ -119,14 +125,16 @@ def create_ship(ships_dict, ship_number, is_ai):
         for ship in ships_dict:
             if ships_dict[ship][1] == position:
                 if not randomize_ships:
-                    print(space + "That position is already occupied by %s" % (ship))
+                    print("%sThat position is already occupied by %s" % (space,
+                                                                         ship))
                 break
             elif ships_dict[ship][1] in [[row - 1, col],
                                          [row + 1, col],
                                          [row, col - 1],
                                          [row, col + 1]]:
                 if not randomize_ships:
-                    print(space + "That position is too close to the %s" % (ship))
+                    print("%sThat position is too close to the %s" % (space,
+                                                                      ship))
                 break
         else:
             return position
@@ -147,7 +155,7 @@ def is_endgame(players):
 # AI players pause
 def pause(ai):
     if ai:
-        time.sleep(timeout)
+        sleep(timeout)
 
 
 def game():
@@ -189,10 +197,11 @@ def game():
                 else:
                     print(space + "Targets available:\n")
                     for player in targets:
-                        print(space * 2 + "%s" % (player))
+                        print("%s%s" % (space * 2, player))
                     print()
                     while True:
-                        response_target = input(space + "Choose a target: ").lower().capitalize()
+                        response_target = input("%sChoose a target: "
+                                                % (space)).lower().capitalize()
                         if response_target in (targets):
                             self.target = response_target
                             break
@@ -201,7 +210,7 @@ def game():
                             break
                         else:
                             print(space + "Choose a valid target")
-            print(space + "Target: %s\n" % self.target)
+            print("%sTarget: %s\n" % (space, self.target))
 
             initialize_guesses_boards(self, self.target)
             self.player_guess()
@@ -211,34 +220,54 @@ def game():
         def player_guess(self):
             if not self.ai:
                 if debug:
-                    print(space + "Enemy Ships:")
+                    print("%sEnemy Ships:" % (space))
                     print_ships(players[self.target].ships)
                 print_board(self.guesses_boards[self.target])
             if self.ai:
                 self.guess = [randint(1, board_size[1]),
                               randint(1, board_size[0])]
                 if debug:
-                    print(space + "AI Guess: %s\n" % (self.guess))
+                    print("%sAI Guess: %s\n" % (space, self.guess))
             else:
-                self.guess = [input_integer(space + "Guess Row", 1, board_size[1]),
-                              input_integer(space + "Guess Col", 1, board_size[0])]
+                self.guess = [input_integer("%sGuess Row" % (space),
+                                            1, board_size[1]),
+                              input_integer("%sGuess Col" % (space),
+                                            1, board_size[0])]
                 print()
             self.check()
 
+        def register_hit(self, target):
+            for player in players:
+                initialize_guesses_boards(players[player],
+                                          self.target)
+                board = players[player].guesses_boards
+                board[self.target][self.guess[0] - 1][self.guess[1] - 1] = "S"
+            print("%s%s sinked a %s ship!"
+                  % (space, self.name, self.target))
+            print("%s%s have %d ships left.\n"
+                  % (space, self.target,
+                     number_of_ships - target.ships_sunked))
+            pause(self.ai)
+            self.get_target()
+            return
+
         # Check guess
         def check(self):
-            for key in players[self.target].ships:
+            target = players[self.target]
+            for ship in target.ships:
                 # Hit a ship
-                if players[self.target].ships[key][1] == [self.guess[0], self.guess[1]]:
+                if target.ships[ship][1] == [self.guess[0], self.guess[1]]:
                     # Ship hasn't been sunked yet
-                    if players[self.target].ships[key][0] is True:
-                        players[self.target].ships[key][0] = False
-                        players[self.target].ships_sunked += 1
+                    if target.ships[ship][0] is True:
+                        target.ships[ship][0] = False
+                        target.ships_sunked += 1
                         # All ships have been sunked
-                        if players[self.target].ships_sunked == number_of_ships:
-                            players[self.target].is_alive = False
-                            print(space + "%s sunked the last ship of %s!" % (self.name, self.target))
-                            print(space + "%s was eliminated from the game.\n" % self.target)
+                        if target.ships_sunked == number_of_ships:
+                            target.is_alive = False
+                            print("%s%s sunked the last ship of %s!" %
+                                  (space, self.name, self.target))
+                            print("%s%s was eliminated from the game.\n" %
+                                  (space, self.target))
                             # All players but self is alive (Winner)
                             if is_endgame(players):
                                 print("%s is the winner!!!\n" % (self.name))
@@ -246,31 +275,29 @@ def game():
                             self.get_target()
                         # There are more ships to be sinked
                         else:
-                            for player in players:
-                                initialize_guesses_boards(players[player], self.target)
-                                players[player].guesses_boards[self.target][self.guess[0] - 1][self.guess[1] - 1] = "S"
-                            print(space + "%s sinked a %s ship!" % (self.name, self.target))
-                            print(space + "%s have %d ships left.\n" % (self.target, number_of_ships - players[self.target].ships_sunked))
-                            pause(self.ai)
-                            self.get_target()
+                            self.register_hit(target)
                         break
                     # Ship already sunked
                     else:
                         if self.ai:
                             self.player_guess()
                         else:
-                            print(space + "That ship has already been sunked.\n")
+                            print("%sThat ship has already been sunked.\n"
+                                  % (space))
                             break
             # Missed
             else:
-                if (self.guesses_boards[self.target][self.guess[0] - 1][self.guess[1] - 1] == "X"):
+                board_target = self.guesses_boards[self.target]
+                if (board_target[self.guess[0] - 1][self.guess[1] - 1] == "X"):
                     if self.ai:
                         self.player_guess()
                     else:
-                        print(space + "%s already guessed that position\n" % (self.name))
+                        print("%s%s already guessed that position\n"
+                              % (space, self.name))
                 else:
-                    self.guesses_boards[self.target][self.guess[0] - 1][self.guess[1] - 1] = "X"
-                    print(space + "%s missed the shot.\n" % (self.name))
+                    board_target[self.guess[0] - 1][self.guess[1] - 1] = "X"
+                    print("%s%s missed the shot.\n"
+                          % (space, self.name))
             pause(self.ai)
 
     # Initialize each Player(class)
@@ -310,7 +337,8 @@ def start():
     print("====== Battleship ======")
     print("========================\n")
     print("New Game (g)")
-    print("Board Size (b)          Current: (%d, %d)" % (board_size[0], board_size[1]))
+    print("Board Size (b)          Current: (%d, %d)"
+          % (board_size[0], board_size[1]))
     print("Number of players (p)   Current: %d" % (number_of_players))
     print("Number of ships (s)     Current: %d" % (number_of_ships))
     print("Cheats/Debug (c)        Current: %s" % (debug))
@@ -336,12 +364,15 @@ def start():
                     "board size",
                     "board_size",
                     "boardsize"):
-        board_size[0] = input_integer("Choose the width of the board", size_interval[0], size_interval[1])
-        board_size[1] = input_integer("Choose the height of the board", size_interval[0], size_interval[1])
+        board_size[0] = input_integer("Choose the width of the board",
+                                      size_interval[0], size_interval[1])
+        board_size[1] = input_integer("Choose the height of the board",
+                                      size_interval[0], size_interval[1])
         max_ships = ships_interval[1](board_size)
         if number_of_ships > max_ships:
             number_of_ships = max_ships
-            print("The number of ships have been reduced to the new maximum: %d" % (max_ships))
+            print("The number of ships was reduced to the new maximum: %d"
+                  % (max_ships))
         start()
         return
     elif answer in ("p",
@@ -349,7 +380,9 @@ def start():
                     "number of players",
                     "number_of_players",
                     "numberofplayers"):
-        number_of_players = input_integer("Choose the number of players", players_interval[0], players_interval[1])
+        number_of_players = input_integer("Choose the number of players",
+                                          players_interval[0],
+                                          players_interval[1])
         start()
         return
     elif answer in ("c",
@@ -373,9 +406,13 @@ def start():
                     "numberofships"):
         if int(ships_interval[1](board_size)) == 1:
             number_of_ships = 1
-            print("At the current board size (%d, %d) there can be only one ship.\n" % (board_size[0], board_size[1]))
+            print("At the current board size (%d, %d)\
+                  there can be only one ship.\n"
+                  % (board_size[0], board_size[1]))
         else:
-            number_of_ships = input_integer("Choose the number of ships", ships_interval[0], ships_interval[1](board_size))
+            number_of_ships = input_integer("Choose the number of ships",
+                                            ships_interval[0],
+                                            ships_interval[1](board_size))
         start()
         return
     elif answer in ("d",
@@ -406,7 +443,9 @@ def start():
                     "ai players",
                     "ai_players",
                     "aiplayers"):
-        ai_players = input_integer("Choose the number of AI players", ai_interval[0], ai_interval[1](number_of_players))
+        ai_players = input_integer("Choose the number of AI players",
+                                   ai_interval[0],
+                                   ai_interval[1](number_of_players))
         start()
         return
     elif answer in ("t",
@@ -415,7 +454,10 @@ def start():
                     "pause time",
                     "pause_time",
                     "pausetime"):
-        timeout = input_integer("Choose a pause time in miliseconds for AI action", time_interval[0], time_interval[1]) / 1000
+        timeout = input_integer("Choose a pause time in\
+                                miliseconds for AI action",
+                                time_interval[0],
+                                time_interval[1]) / 1000
         start()
         return
     else:
