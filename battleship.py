@@ -99,12 +99,6 @@ def initialize_guesses_boards(player, target):
             player.guesses_boards[target].append(["O"] * board_size[0])
 
 
-# Randomize position for a ship
-def random_position(position_range):
-    position = [randint(1, position_range[1]), randint(1, position_range[0])]
-    return position
-
-
 # Check if ship does not conflict with a existing one
 def ship_is_valid(ships_dict, row, col):
     for ship in ships_dict:
