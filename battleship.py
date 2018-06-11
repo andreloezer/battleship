@@ -381,7 +381,7 @@ def start():
                                       size_interval[0], size_interval[1])
         max_ships = ships_interval[1](board_size)
         if number_of_ships > max_ships:
-            number_of_ships = max_ships
+            number_of_ships = int(max_ships)
             print("The number of ships was reduced to the new maximum: %d"
                   % (max_ships))
         start()
