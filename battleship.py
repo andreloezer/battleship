@@ -10,13 +10,14 @@ from time import sleep
 
 # Default settings
 default = {
-    "board_size": [6, 6],
-    "debug": False,
-    "number_of_ships": 3,
-    "number_of_players": 2,
+    "board_size": [12, 12],
+    "debug": True,
+    "number_of_ships": 5,
+    "number_of_players": 8,
     "randomize_ships": True,
-    "ai_players": 1,
-    "timeout": 1
+    "ai_players": 7,
+    "timeout": 500,
+    "ship_size": 3
   }
 
 # User settings
@@ -27,14 +28,16 @@ number_of_players = default["number_of_players"]
 ai_players = default["ai_players"]
 randomize_ships = default["randomize_ships"]
 timeout = default["timeout"]
+ship_size = default["ship_size"]
 space = "  "
 
 # Settings values interval
-size_interval = [3, 15]
+board_interval = [3, 15]
 ships_interval = [1, lambda size: ((size[0] + size[1]) / 2) * 0.6]
 players_interval = [2, 8]
 ai_interval = [0, lambda ai: ai - 1]
 time_interval = [0, 5000]
+size_interval = [1, 5]
 
 
 # Print user readable board
@@ -59,13 +62,6 @@ def print_board(board):
         i += 1
     print(sub_header)
     print(header)
-    print()
-
-
-# Print ships dictionary
-def print_ships(dict):
-    for player in dict:
-        print("%s%s: %s" % (space * 2, player, dict[player]))
     print()
 
 
@@ -99,45 +95,6 @@ def initialize_guesses_boards(player, target):
             player.guesses_boards[target].append(["O"] * board_size[0])
 
 
-# Check if ship does not conflict with a existing one
-def ship_is_valid(ships_dict, row, col):
-    for ship in ships_dict:
-        if ships_dict[ship][1] == [row, col]:
-            if not randomize_ships:
-                print("%sThat position is already occupied by %s"
-                      % (space, ship))
-            return False
-        elif ships_dict[ship][1] in [[row - 1, col],
-                                     [row + 1, col],
-                                     [row, col - 1],
-                                     [row, col + 1]]:
-            if not randomize_ships:
-                print("%sThat position is too close to the %s"
-                      % (space, ship))
-            return False
-    else:
-        return True
-
-
-# Create ships, ensuring no ships on same position
-def create_ship(ships_dict, ship_number, is_ai):
-    while True:
-        if randomize_ships or is_ai:
-            row = randint(1, board_size[1])
-            col = randint(1, board_size[0])
-        else:
-            print("\n" + space + "Ship %d:" % (ship_number))
-            row = input_integer("%sChoose Ship %d row" % (space, ship_number),
-                                1, board_size[1])
-            col = input_integer("%sChoose Ship %d col" % (space, ship_number),
-                                1, board_size[0])
-        if len(ships_dict) == 0:
-            return [row, col]
-        # Return position only when don't conflict with other ships
-        if ship_is_valid(ships_dict, row, col):
-            return [row, col]
-
-
 # Check if current player is the only one alive
 def is_endgame(players):
     count = 0
@@ -153,7 +110,7 @@ def is_endgame(players):
 # AI players pause
 def pause(ai):
     if ai:
-        sleep(timeout)
+        sleep(timeout / 1000)
 
 
 # Each game
@@ -162,24 +119,182 @@ def game():
     rounds = 0
     players = {}
 
+    class Ship(object):
+        def __init__(self, player, ships, number, size=1, direction="random"):
+            self.floating = True
+            self.size = size
+            self.direction = direction
+            self.player = player
+            self.ships = ships
+            self.number = number
+            self.hits = 0
+            self.positions = []
+            self.ship_large()
+
+        def gen_direction(self):
+            if self.size == 1:
+                return None
+            else:
+                if self.direction == "random":
+                    return ["horizontal", "vertical"][randint(0, 1)]
+                else:
+                    return self.direction
+
+        def __str__(self):
+            return "%s" % (self.positions)
+
+        def create_ship(self, hor, ver):
+            positions = []
+            if self.direction is None:
+                position = [hor, ver]
+            for point in range(self.size):
+                if self.direction == "horizontal":
+                    position = [hor, ver + point + 1]
+                elif self.direction == "vertical":
+                    position = [hor + point + 1, ver]
+                if self.validate(position):
+                    positions.append([True, position])
+                else:
+                    return False
+            else:
+                return positions
+
+        # Create ship with size bigger than 1
+        def ship_large(self):
+            while True:
+                if randomize_ships or self.player.ai:
+                    if self.direction in (None, "random"):
+                        self.direction = self.gen_direction()
+                    if self.direction == "horizontal":
+                        hor = randint(1, board_size[1])
+                        ver = randint(1, board_size[0] - self.size - 1)
+                    elif self.direction == "vertical":
+                        hor = randint(1, board_size[1] - self.size - 1)
+                        ver = randint(1, board_size[0])
+                    else:
+                        hor = randint(1, board_size[1])
+                        ver = randint(1, board_size[0])
+                    ship = self.create_ship(hor, ver)
+                else:
+                    ship = self.ask_position_large()
+                if ship:
+                    self.positions = ship
+                    break
+
+        # Check if ship is still floating
+        def is_floating(self):
+            if self.hits == self.size:
+                self.floating = False
+                return False
+
+        # Create position
+        def random_position(self):
+            row = randint(1, board_size[1])
+            col = randint(1, board_size[0])
+            return [row, col]
+
+        def ask_direction(self):
+            while True:
+                direction = input("%sChoose the direction" % (space)
+                                  + "(horizontal, vertical, random): "
+                                  ).lower()
+                if direction in ("h", "horizontal"):
+                    return "horizontal"
+                elif direction in ("v", "vertical"):
+                    return "vertical"
+                elif direction in ("r", "random"):
+                    self.direction = "random"
+                    return self.gen_direction()
+                else:
+                    print("%sEnter a valid direction" % (space))
+
+        def ask_position_large(self):
+            print("\n%sShip %d (lenght: %d)" % (space, self.number, self.size))
+            self.direction = self.ask_direction()
+            print("%sShip %d direction: %s"
+                  % (space * 2, self.number, self.direction))
+            if self.direction == "horizontal":
+                hor = input_integer("%sChoose row" % (space),
+                                    1, board_size[1])
+                ver = input_integer("%sChoose starting col" % (space),
+                                    1, board_size[0] - self.size) - 1
+            elif self.direction == "vertical":
+                ver = input_integer("%sChoose col" % (space),
+                                    1, board_size[0])
+                hor = input_integer("%sChoose starting row" % (space),
+                                    1, board_size[1] - self.size) - 1
+            ship = self.create_ship(hor, ver)
+            return ship
+
+        # Player chooses the ship position
+        def ask_position(self):
+            print("\n%sShip %d:" % (space, self.number))
+            row = input_integer("%sChoose Ship %d row"
+                                % (space, self.number),
+                                1, board_size[1])
+            col = input_integer("%sChoose Ship %d col"
+                                % (space, self.number),
+                                1, board_size[0])
+            return [row, col]
+
+        # Check if position doesn't conflict with other ships
+        def validate(self, position):
+            row = position[0]
+            col = position[1]
+            for ship in self.ships:
+                for ship_position in ship.positions:
+                    if ship_position[1] == [row, col]:
+                        if not (randomize_ships or self.player.ai):
+                            print("\n%sPosition already occupied"
+                                  % (space * 2))
+                        return False
+                    elif ship_position[1] in [[row - 1, col],
+                                              [row + 1, col],
+                                              [row, col - 1],
+                                              [row, col + 1]]:
+                        if not (randomize_ships or self.player.ai):
+                            print("\n%sToo close to another ship"
+                                  % (space * 2))
+                        return False
+            else:
+                return True
+
+        # Generate random position and validate
+        def gen_position(self):
+            position = []
+            if randomize_ships or self.player.ai:
+                position = self.random_position()
+            else:
+                position = self.ask_position()
+            if self.validate(position):
+                return position
+            else:
+                return False
+
     # Generic player class
     class Player(object):
         def __init__(self, name, ai):
             self.is_alive = True
             self.name = name
             self.ai = ai
-            self.ships = {}
+            self.ships = []
             self.ships_sunked = 0
             self.ships_board = []
             self.guesses_boards = {}
             self.guess = []
 
             # Creates dictionary of the ships
-            if not (self.ai and randomize_ships):
+            if not (self.ai or randomize_ships):
                 print("\n%s%s position your ships:" % (space, self.name))
             for ship in range(number_of_ships):
-                ship_position = create_ship(self.ships, ship + 1, self.ai)
-                self.ships["Ship %s" % (ship + 1)] = [True, ship_position]
+                self.ships.append(Ship(self, self.ships, ship + 1, ship_size))
+
+        # Print ships dictionary
+        def print_ships(self):
+            ships = players[self.target].ships
+            for ship in ships:
+                print("%s%s" % (space * 2, ship))
+            print()
 
         # Ask player to give a target
         def ask_target(self, targets):
@@ -224,7 +339,7 @@ def game():
             if not self.ai:
                 if debug:
                     print("%sEnemy Ships:" % (space))
-                    print_ships(players[self.target].ships)
+                    self.print_ships()
                 print_board(self.guesses_boards[self.target])
             if self.ai:
                 self.guess = [randint(1, board_size[1]),
@@ -268,7 +383,7 @@ def game():
             self.get_target()
             return
 
-        # Shot missed
+        # Register the wrong guess in the guesses board
         def missed(self, target):
             if (target[self.guess[0] - 1][self.guess[1] - 1] == "X"):
                 if self.ai:
@@ -286,10 +401,10 @@ def game():
             target = players[self.target]
             for ship in target.ships:
                 # Hit a ship
-                if target.ships[ship][1] == [self.guess[0], self.guess[1]]:
+                if ship.positions[0][1] == [self.guess[0], self.guess[1]]:
                     # Ship hasn't been sunked yet
-                    if target.ships[ship][0] is True:
-                        target.ships[ship][0] = False
+                    if ship.positions[0][0] is True:
+                        ship.positions[0][0] = False
                         target.ships_sunked += 1
                         # All ships have been sunked
                         if target.ships_sunked == number_of_ships:
@@ -344,6 +459,7 @@ def start():
     global randomize_ships
     global ai_players
     global timeout
+    global ship_size
     print("\n========================")
     print("====== Battleship ======")
     print("========================\n")
@@ -351,11 +467,12 @@ def start():
     print("Board Size (b)          Current: (%d, %d)"
           % (board_size[0], board_size[1]))
     print("Number of players (p)   Current: %d" % (number_of_players))
-    print("Number of ships (s)     Current: %d" % (number_of_ships))
+    print("Number of ships (ns)     Current: %d" % (number_of_ships))
+    print("Ship Size (ss)          Current: %d" % (ship_size))
     print("Cheats/Debug (c)        Current: %s" % (debug))
     print("Randomize ships (r)     Current: %s" % (randomize_ships))
     print("AI players (a)          Current: %d" % (ai_players))
-    print("AI pause time (t)       Current: %ss" % (timeout))
+    print("AI pause time (t)       Current: %ss" % (timeout / 1000))
     print("Restore default (d)")
     print("Exit/Quit (e/q)\n")
 
@@ -376,9 +493,9 @@ def start():
                     "board_size",
                     "boardsize"):
         board_size[0] = input_integer("Choose the width of the board",
-                                      size_interval[0], size_interval[1])
+                                      board_interval[0], board_interval[1])
         board_size[1] = input_integer("Choose the height of the board",
-                                      size_interval[0], size_interval[1])
+                                      board_interval[0], board_interval[1])
         max_ships = ships_interval[1](board_size)
         if number_of_ships > max_ships:
             number_of_ships = int(max_ships)
@@ -410,8 +527,7 @@ def start():
                     "quit"):
         print("Exit game\n")
         return
-    elif answer in ("s",
-                    "ships",
+    elif answer in ("ns",
                     "number of ships",
                     "number_of_ships",
                     "numberofships"):
@@ -424,6 +540,15 @@ def start():
             number_of_ships = input_integer("Choose the number of ships",
                                             ships_interval[0],
                                             ships_interval[1](board_size))
+        start()
+        return
+    elif answer in ("ss",
+                    "ship size",
+                    "ship_size",
+                    "shipsize"):
+        ship_size = input_integer("Choose the size of the ships",
+                                  size_interval[0],
+                                  size_interval[1])
         start()
         return
     elif answer in ("d",
@@ -465,10 +590,10 @@ def start():
                     "pause time",
                     "pause_time",
                     "pausetime"):
-        timeout = input_integer("Choose a pause time in\
-                                miliseconds for AI action",
+        timeout = input_integer("Choose a pause time in"
+                                + "miliseconds for AI action",
                                 time_interval[0],
-                                time_interval[1]) / 1000
+                                time_interval[1])
         start()
         return
     else:
