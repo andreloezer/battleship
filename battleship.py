@@ -10,14 +10,14 @@ from time import sleep
 
 # Default settings
 default = {
-    "board_size": [15, 15],
+    "board_size": [12, 12],
     "debug": True,
-    "number_of_ships": 5,
+    "number_of_ships": 4,
     "number_of_players": 8,
     "randomize_ships": True,
     "ai_players": 7,
-    "timeout": 500,
-    "ship_size": 5
+    "timeout": 1,
+    "ship_size": 3
   }
 
 # User settings
@@ -364,21 +364,41 @@ class Player(object):
             start()
         self.get_target()
 
-    # Register the hit in all players guesse board of the target
-    def register_hit(self, target):
-        for player in players:
-            initialize_guesses_boards(players[player],
-                                      self.target)
-            board = players[player].guesses_boards
-            board[self.target][self.guess[0] - 1][self.guess[1] - 1] = "S"
-        print("%s%s sinked a %s ship!"
-              % (space, self.name, self.target))
-        print("%s%s have %d ships left.\n"
-              % (space, self.target,
-                 number_of_ships - target.ships_sunked))
-        pause(self.ai)
-        self.get_target()
-        return
+# Hit a ship
+    def hit(self, target, ship, position):
+        if position[0]:
+            position[0] = False
+            # Register the hit in all players guesse board of the target
+            for player in players:
+                initialize_guesses_boards(players[player],
+                                          self.target)
+                board = players[player].guesses_boards
+                board[self.target][self.guess[0] - 1][self.guess[1] - 1] = "S"
+            ship.hits += 1
+            # Ship sunked
+            if ship.hits == ship.size:
+                target.ships_sunked += 1
+                if target.ships_sunked == number_of_ships:
+                    self.eliminate_player(target)
+                else:
+                    print("%s%s sunked Ship %d from %s"
+                          % (space, self.name,
+                             ship.number, target.name))
+                    print("%s%s have %d ships left.\n"
+                          % (space, self.target,
+                             number_of_ships
+                             - target.ships_sunked))
+                    pause(self.ai)
+                    self.get_target()
+            else:
+                print("%s%s hitted Ship %d from %s\n"
+                      % (space, self.name,
+                         ship.number, target.name))
+                pause(self.ai)
+                self.player_guess()
+        else:
+            print("%sPosition was already hitted\n"
+                  % (space))
 
     # Register the wrong guess in the guesses board
     def missed(self, target):
@@ -397,28 +417,11 @@ class Player(object):
     def check(self):
         target = players[self.target]
         for ship in target.ships:
-            # Hit a ship
-            if ship.positions[0][1] == [self.guess[0], self.guess[1]]:
-                # Ship hasn't been sunked yet
-                if ship.positions[0][0] is True:
-                    ship.positions[0][0] = False
-                    target.ships_sunked += 1
-                    # All ships have been sunked
-                    if target.ships_sunked == number_of_ships:
-                        self.eliminate_player(target)
-                    # There are more ships to be sinked
-                    else:
-                        self.register_hit(target)
-                    break
-                # Ship already sunked
-                else:
-                    if self.ai:
-                        self.player_guess()
-                    else:
-                        print("%sThat ship has already been sunked.\n"
-                              % (space))
-                        break
-        # Missed
+            for position in ship.positions:
+                if position[1] == [self.guess[0], self.guess[1]]:
+                    # Position is floating
+                    self.hit(target, ship, position)
+                    return
         else:
             self.missed(self.guesses_boards[self.target])
         pause(self.ai)
@@ -516,6 +519,9 @@ def start():
         number_of_players = input_integer("Choose the number of players",
                                           players_interval[0],
                                           players_interval[1])
+        if ai_players > number_of_players - 1:
+            ai_players = number_of_players - 1
+            print("AI players reduced to %d." % (ai_players))
         start()
         return
     elif answer in ("c",
