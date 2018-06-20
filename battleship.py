@@ -7,6 +7,14 @@
 
 from random import randint
 from time import sleep
+# https://pypi.org/project/colorama/
+from colorama import init, Fore, Back, Style
+import os
+
+# Enable VT100 Escape Sequence for WINDOWS 10 Ver. 1607
+os.system('')
+
+init(autoreset=True)
 
 # Default settings
 default = {
@@ -56,9 +64,19 @@ def print_board(board):
     print()
     for row in board:
         if i >= 10:
-            print("%s%d-  %s  -%d" % (space, i, "   ".join(row), i))
+            print_row = "%s%d-  " % (space, i)
         else:
-            print("%s %d-  %s  -%d" % (space, i, "   ".join(row), i))
+            print_row = "%s %d-  " % (space, i)
+        for item in row:
+            if item == "X":
+                print_row += Fore.RED + item + Style.RESET_ALL
+            elif item == "S":
+                print_row += Fore.GREEN + item + Style.RESET_ALL
+            else:
+                print_row += Fore.BLUE + item + Style.RESET_ALL
+            print_row += "   "
+        print_row += "-%d" % (i)
+        print(print_row)
         print()
         i += 1
     print(sub_header)
@@ -116,16 +134,16 @@ def pause(ai):
 
 # Ship Class
 class Ship(object):
-    def __init__(self, player, ships, number, size=1, direction="random"):
+    def __init__(self, player, ships, name, size=1, direction="random"):
         self.floating = True
         self.size = size
         self.direction = direction
         self.player = player
         self.ships = ships
-        self.number = number
+        self.name = name
         self.hits = 0
         self.positions = []
-        self.ship_large()
+        self.create_ship()
 
     def gen_direction(self):
         if self.size == 1:
@@ -137,9 +155,15 @@ class Ship(object):
                 return self.direction
 
     def __str__(self):
-        return "%s" % (self.positions)
+        string = ""
+        for position in self.positions:
+            if position[0]:
+                string += Fore.GREEN + str(position[1])
+            else:
+                string += Fore.RED + str(position[1])
+        return string
 
-    def create_ship(self, hor, ver):
+    def gen_ship(self, hor, ver):
         positions = []
         if self.direction is None:
             position = [hor, ver]
@@ -156,7 +180,7 @@ class Ship(object):
             return positions
 
     # Create ship with size bigger than 1
-    def ship_large(self):
+    def create_ship(self):
         while True:
             if randomize_ships or self.player.ai:
                 if self.direction in (None, "random"):
@@ -170,9 +194,12 @@ class Ship(object):
                 else:
                     hor = randint(1, board_size[1])
                     ver = randint(1, board_size[0])
-                ship = self.create_ship(hor, ver)
+                ship = self.gen_ship(hor, ver)
             else:
-                ship = self.ask_position_large()
+                if self.size == 1:
+                    ship = self.ask_position()
+                else:
+                    ship = self.ask_position_length()
             if ship:
                 self.positions = ship
                 break
@@ -204,15 +231,15 @@ class Ship(object):
             else:
                 print("%sEnter a valid direction" % (space))
 
-    def ask_position_large(self):
-        print("\n%sShip %d (lenght: %d)" % (space, self.number, self.size))
+    def ask_position_length(self):
+        print("\n%s%s (lenght: %d)" % (space, self.name, self.size))
         self.direction = self.ask_direction()
-        print("%sShip %d direction: %s"
-              % (space * 2, self.number, self.direction))
+        print("%s%s direction: %s"
+              % (space * 2, self.name, self.direction))
         if self.direction == "horizontal":
             hor = input_integer("%sChoose row" % (space),
                                 1, board_size[1])
-            ver = input_integer("%sChoose starting col" % (space),
+            ver = input_integer("%sChoose starting column" % (space),
                                 1, board_size[0] - self.size) - 1
         elif self.direction == "vertical":
             ver = input_integer("%sChoose col" % (space),
@@ -224,14 +251,18 @@ class Ship(object):
 
     # Player chooses the ship position
     def ask_position(self):
-        print("\n%sShip %d:" % (space, self.number))
-        row = input_integer("%sChoose Ship %d row"
-                            % (space, self.number),
+        print("\n%s%s:" % (space, self.name))
+        row = input_integer("%sChoose %s row"
+                            % (space, self.name),
                             1, board_size[1])
-        col = input_integer("%sChoose Ship %d col"
-                            % (space, self.number),
+        col = input_integer("%sChoose %s column"
+                            % (space, self.name),
                             1, board_size[0])
-        return [row, col]
+        position = [row, col]
+        if self.validate(position):
+            return [[True, position]]
+        else:
+            return False
 
     # Check if position doesn't conflict with other ships
     def validate(self, position):
@@ -255,18 +286,6 @@ class Ship(object):
         else:
             return True
 
-    # Generate random position and validate
-    def gen_position(self):
-        position = []
-        if randomize_ships or self.player.ai:
-            position = self.random_position()
-        else:
-            position = self.ask_position()
-        if self.validate(position):
-            return position
-        else:
-            return False
-
 
 # Player class
 class Player(object):
@@ -279,18 +298,25 @@ class Player(object):
         self.ships_board = []
         self.guesses_boards = {}
         self.guess = []
+        self.init_ships()
 
-        # Creates dictionary of the ships
+    # Initializes ships class
+    def init_ships(self):
         if not (self.ai or randomize_ships):
             print("\n%s%s position your ships:" % (space, self.name))
         for ship in range(number_of_ships):
-            self.ships.append(Ship(self, self.ships, ship + 1, ship_size))
+            self.ships.append(Ship(self, self.ships, "Ship "
+                                   + str(ship + 1), ship_size))
 
-    # Print ships dictionary
+    # Print own ships
     def print_ships(self):
         ships = players[self.target].ships
         for ship in ships:
-            print("%s%s" % (space * 2, ship))
+            if ship.floating:
+                name = Fore.GREEN + ship.name + Style.RESET_ALL
+            else:
+                name = Fore.RED + ship.name + Style.RESET_ALL
+            print("%s%s: %s" % (space * 2, name, ship))
         print()
 
     # Ask player to give a target
@@ -344,23 +370,28 @@ class Player(object):
             if debug:
                 print("%sAI Guess: %s\n" % (space, self.guess))
         else:
-            self.guess = [input_integer("%sGuess Row" % (space),
+            self.guess = [input_integer("%sGuess Row   " % (space),
                                         1, board_size[1]),
-                          input_integer("%sGuess Col" % (space),
+                          input_integer("%sGuess Column" % (space),
                                         1, board_size[0])]
             print()
         self.check()
 
     # Eliminate current target player, checks for endgame
     def eliminate_player(self, target):
+        print_board(self.guesses_boards[self.target])
         target.is_alive = False
-        print("%s%s sunked the last ship of %s!" %
-              (space, self.name, self.target))
-        print("%s%s was eliminated from the game.\n" %
-              (space, self.target))
+        print("%s%s%s%s sunked the last ship of %s%s%s!" %
+              (space, Fore.GREEN, self.name, Style.RESET_ALL,
+               Fore.RED, self.target, Style.RESET_ALL))
+        print("%s%s%s%s was %seliminated%s from the game.\n" %
+              (space, Fore.RED, self.target, Style.RESET_ALL,
+               Style.BRIGHT, Style.RESET_ALL))
         # All players but self is alive (Winner)
         if is_endgame(players):
-            print("%s is the winner!!!\n" % (self.name))
+            print("%s%s%s%s is the winner!!!%s\n"
+                  % (Style.BRIGHT, Fore.GREEN, self.name,
+                     Fore.WHITE, Style.RESET_ALL))
             start()
         self.get_target()
 
@@ -377,23 +408,26 @@ class Player(object):
             ship.hits += 1
             # Ship sunked
             if ship.hits == ship.size:
+                print_board(self.guesses_boards[self.target])
+                ship.floating = False
                 target.ships_sunked += 1
                 if target.ships_sunked == number_of_ships:
                     self.eliminate_player(target)
                 else:
-                    print("%s%s sunked Ship %d from %s"
-                          % (space, self.name,
-                             ship.number, target.name))
-                    print("%s%s have %d ships left.\n"
-                          % (space, self.target,
-                             number_of_ships
+                    print("%s%s%s%s sunked %s from %s%s%s"
+                          % (space, Fore.GREEN, self.name, Style.RESET_ALL,
+                             ship.name, Fore.RED, target.name,
+                             Style.RESET_ALL))
+                    print("%s%s%s%s have %d ships left.\n"
+                          % (space, Fore.RED, self.target,
+                             Style.RESET_ALL, number_of_ships
                              - target.ships_sunked))
                     pause(self.ai)
                     self.get_target()
             else:
-                print("%s%s hitted Ship %d from %s\n"
-                      % (space, self.name,
-                         ship.number, target.name))
+                print("%s%s%s%s hitted %s from %s%s%s\n"
+                      % (space, Fore.GREEN, self.name, Style.RESET_ALL,
+                         ship.name, Fore.RED, target.name, Style.RESET_ALL))
                 pause(self.ai)
                 self.player_guess()
         else:
@@ -410,8 +444,8 @@ class Player(object):
                       % (space, self.name))
         else:
             target[self.guess[0] - 1][self.guess[1] - 1] = "X"
-            print("%s%s missed the shot.\n"
-                  % (space, self.name))
+            print("%s%s %smissed%s the shot.\n"
+                  % (space, self.name, Fore.RED, Style.RESET_ALL))
 
     # Check guess
     def check(self):
@@ -425,6 +459,8 @@ class Player(object):
         else:
             self.missed(self.guesses_boards[self.target])
         pause(self.ai)
+        if self.ai is False:
+            print_board(self.guesses_boards[self.target])
 
 
 # Each game
@@ -469,7 +505,7 @@ def start():
     global timeout
     global ship_size
     print("\n========================")
-    print("====== Battleship ======")
+    print("====== %sBattleship%s ======" % (Back.BLUE, Style.RESET_ALL))
     print("========================\n")
     print("New Game (g)")
     print("Board Size (b)          Current: (%d, %d)"
