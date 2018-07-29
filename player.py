@@ -50,9 +50,10 @@ class Player(object):
         ships = self.target.ships
         for ship in ships:
             if ship.floating:
-                name = Fore.GREEN + ship.name + Style.RESET_ALL
+                color = Fore.GREEN
             else:
-                name = Fore.RED + ship.name + Style.RESET_ALL
+                color = Fore.RED
+            name = color + ship.name + Style.RESET_ALL
             print("%s%s: %s" % (set["space"] * 2, name, ship))
         print()
 
@@ -61,9 +62,10 @@ class Player(object):
         header = "%s     " % (set["space"])
         for col in range(set["board"][0]):
             if col >= 9:
-                header = header + str(col + 1) + "  "
+                space = "  "
             else:
-                header = header + str(col + 1) + "   "
+                space = "   "
+            header += str(col + 1) + space
             i = 1
         print(header)
         sub_header = "%s     |%s" % (set["space"],
@@ -77,14 +79,14 @@ class Player(object):
                 print_row = "%s %d-  " % (set["space"], i)
             for item in row:
                 if item == "X":
-                    print_row += Fore.RED + item + Style.RESET_ALL
+                    color = Fore.RED
                 elif item == "H":
-                    print_row += Fore.GREEN + item + Style.RESET_ALL
+                    color = Fore.GREEN
                 elif item == "S":
-                    print_row += Fore.WHITE + item + Style.RESET_ALL
+                    color = Fore.CYAN
                 else:
-                    print_row += Fore.BLUE + item + Style.RESET_ALL
-                print_row += "   "
+                    color = Fore.BLUE
+                print_row += color + item + Style.RESET_ALL + "   "
             print_row += "-%d" % (i)
             print(print_row)
             print()
@@ -202,7 +204,7 @@ class Player(object):
             menu.menu()
         self.get_target()
 
-# Register the targets sunked ship in all players guesses board
+    # Register the targets sunked ship in all players guesses board
     def register_ship(self, ship):
         for player in self.players.values():
             self.init_boards(player)
@@ -210,44 +212,52 @@ class Player(object):
             for position in ship.positions:
                 board[position[1][0] - 1][position[1][1] - 1] = "S"
 
-# Hit a ship
+    # Ship sunked
+    def sink_ship(self, ship):
+        self.register_ship(ship)
+        self.print_board()
+        ship.floating = False
+        self.target.ships_sunked += 1
+        if self.target.ships_sunked == set["ships"]:
+            self.eliminate_player()
+        else:
+            print("%s%s%s%s %ssunked%s %s%s%s %s."
+                  % (set["space"], Style.BRIGHT, self.name,
+                     Style.RESET_ALL, Fore.GREEN, Style.RESET_ALL,
+                     Style.BRIGHT, self.target.name,
+                     Style.RESET_ALL, ship.name))
+            print("%s%s%s%s have %d ships left.\n"
+                  % (set["space"], Style.BRIGHT, self.target.name,
+                     Style.RESET_ALL, set["ships"]
+                     - self.target.ships_sunked))
+            if self.ai:
+                sleep(set["timeout"])
+            self.get_target()
+            return
+
+    # Hit a ship
     def hit(self, ship, position):
         board = self.guesses[self.target]
-        board[self.guess[0] - 1][self.guess[1] - 1] = "H"
-        if position[0]:
-            position[0] = False
-            ship.hits += 1
-            # Ship sunked
-            if ship.hits == ship.size:
-                self.register_ship(ship)
-                self.print_board()
-                ship.floating = False
-                self.target.ships_sunked += 1
-                if self.target.ships_sunked == set["ships"]:
-                    self.eliminate_player()
-                else:
-                    print("%s%s%s%s %ssunked%s %s%s%s %s."
-                          % (set["space"], Style.BRIGHT, self.name,
-                             Style.RESET_ALL, Fore.GREEN, Style.RESET_ALL,
-                             Style.BRIGHT, self.target.name, Style.RESET_ALL,
-                             ship.name))
-                    print("%s%s%s%s have %d ships left.\n"
-                          % (set["space"], Style.BRIGHT, self.target.name,
-                             Style.RESET_ALL, set["ships"]
-                             - self.target.ships_sunked))
-                    if self.ai:
-                        sleep(set["timeout"])
-                    self.get_target()
-                    return
-        print("%s%s%s%s %shitted%s %s%s%s %s.\n"
-              % (set["space"], Style.BRIGHT, self.name,
-                 Style.RESET_ALL, Fore.GREEN, Style.RESET_ALL,
-                 Style.BRIGHT, self.target.name, Style.RESET_ALL,
-                 ship.name))
-        if self.ai:
-            sleep(set["timeout"])
-        self.player_guess()
-        return
+        if board[self.guess[0] - 1][self.guess[1] - 1] == "O":
+            board[self.guess[0] - 1][self.guess[1] - 1] = "H"
+            if position[0]:
+                position[0] = False
+                ship.hits += 1
+                if ship.hits == ship.size:
+                    self.sink_ship(ship)
+            print("%s%s%s%s %shitted%s %s%s%s %s.\n"
+                  % (set["space"], Style.BRIGHT, self.name,
+                     Style.RESET_ALL, Fore.GREEN, Style.RESET_ALL,
+                     Style.BRIGHT, self.target.name, Style.RESET_ALL,
+                     ship.name))
+            if self.ai:
+                sleep(set["timeout"])
+            self.player_guess()
+            return
+        else:
+            print("%sPosition was already hitted\n"
+                  % (set["space"]))
+            return
 
     # Register the wrong guess in the guesses board
     def missed(self):
@@ -266,17 +276,10 @@ class Player(object):
 
     # Check guess
     def check(self):
-        board = self.guesses[self.target]
         for ship in self.target.ships:
             for position in ship.positions:
                 if position[1] == [self.guess[0], self.guess[1]]:
-                    if board[self.guess[0] - 1][self.guess[1] - 1] == "O":
-                        # Position is floating
-                        self.hit(ship, position)
-                    else:
-                        print("%sPosition was already hitted\n"
-                              % (set["space"]))
-                        return
+                    self.hit(ship, position)
                     return
         else:
             self.missed()
