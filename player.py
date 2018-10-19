@@ -160,7 +160,7 @@ class Player(object):
 
     # Register the wrong guess in the guesses board
     def missed(self):
-        if self.direction:
+        if self.ai and self.direction:
             self.directions[self.direction] = False
         board = self.guesses[self.target]
         if (board[self.guess[0] - 1][self.guess[1] - 1] == "X"):
