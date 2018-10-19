@@ -26,18 +26,18 @@ def menu():
     print("New Game (g)")
     print("Board Size (b)          Current: (%d, %d)"
           % (set["board"][0], set["board"][1]))
-    print("Number of players (p)   Current: %d" % (set["players"]))
-    print("Number of ships (ns)    Current: %d" % (set["ships"]))
+    print("Number of Players (p)   Current: %d" % (set["players"]))
+    print("Number of Ships (ns)    Current: %d" % (set["ships"]))
     print("Ship Size (ss)          Current: %d" % (set["size"]))
     print("Cheat (c)               Current: %s%s%s"
           % (debug_color, set["cheat"], Style.RESET_ALL))
-    print("Randomize ships (r)     Current: %s%s%s"
+    print("Randomize Ships (r)     Current: %s%s%s"
           % (randomize_color, set["randomize"], Style.RESET_ALL))
-    print("AI players (a)          Current: %d" % (set["ai"]))
-    print("AI pause time (t)       Current: %ss" % (set["timeout"]))
-    print("AI smart (as)     Current: %s%s%s"
+    print("AI Players (a)          Current: %d" % (set["ai"]))
+    print("AI Pause Time (t)       Current: %ss" % (set["timeout"]))
+    print("AI Smart Guessing (sg)  Current: %s%s%s"
           % (smart_color, set["smart"], Style.RESET_ALL))
-    print("Restore default (d)")
+    print("Restore Default (d)")
     print("Exit/Quit (e/q)\n")
 
     answer = input("What's your choice? ").lower()
@@ -92,9 +92,11 @@ def menu():
         print()
         menu()
         return
-    elif answer in ("as",
+    elif answer in ("sg",
+                    "smart",
                     "ai smart",
-                    "smart"):
+                    "smart guessing",
+                    "ai smart guessing"):
         set["smart"] = not set["smart"]
         print("smart: %s" % (set["smart"]))
         print()
