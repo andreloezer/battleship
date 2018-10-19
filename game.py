@@ -1,7 +1,8 @@
 from copy import deepcopy
 
 from settings import settings as set
-from player import Player
+from human import Human
+from machine import Machine
 
 
 captains = ["Captain Jack Sparrow",
@@ -19,10 +20,9 @@ captains = ["Captain Jack Sparrow",
 
 # Each game
 def game():
-    global players
     rounds = 0
     players = {}
-    print("\n======= New Game =======\n")
+    print("\n======= New Game =======")
 
     names = deepcopy(captains)
 
@@ -30,12 +30,12 @@ def game():
     # Human players
     for player in range(set["players"] - set["ai"]):
         key = "Player %s" % (player + 1)
-        players[key] = Player(players, key, False, names)
+        players[key] = Human(players, key, names)
     # AI players
     for player in range(set["ai"]):
         key = ("Player %s"
                % (player + 1 + (set["players"] - set["ai"])))
-        players[key] = Player(players, key, True, names)
+        players[key] = Machine(players, key, names)
 
     # Loop trought turns
     while True:
@@ -45,7 +45,7 @@ def game():
         for player in players:
 
             if players[player].is_alive is True:
-                print("%s Turn\n" % player)
+                print("%s(%s) Turn\n" % (players[player].name, player))
                 players[player].get_target()
 
     return

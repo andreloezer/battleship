@@ -2,30 +2,24 @@ from random import randint
 from time import sleep
 from colorama import Fore, Style
 from settings import settings as set
-from functions import input_num
 import menu
 from ship import Ship
 
 
 # Player class
 class Player(object):
-    def __init__(self, players, key, ai, names):
+    def __init__(self, players, key, names):
         self.is_alive = True
         self.names = names
         self.players = players
         self.key = key
-        self.ai = ai
         self.ships = []
         self.ships_sunked = 0
         self.guesses = {}
         self.guess = []
-        self.init_ships()
 
     # Initializes ships class
     def init_ships(self):
-        self.get_name()
-        if not (self.ai or set["randomize"]):
-            print("\n%s%s position your ships:" % (set["space"], self.name))
         for ship in range(set["ships"]):
             self.ships.append(Ship(self, self.ships, "Ship "
                                    + str(ship + 1), set["size"]))
@@ -34,66 +28,6 @@ class Player(object):
         name = self.names[randint(0, len(self.names) - 1)]
         self.names.remove(name)
         return name
-
-    def get_name(self):
-        if self.ai:
-            self.name = self.give_name()
-        else:
-            self.name = input("Player name: ")
-            if not self.name:
-                self.name = self.give_name()
-                print("\n%sRandom name choosen: %s"
-                      % (set["space"], self.name))
-
-    # Print own ships
-    def print_ships(self):
-        ships = self.target.ships
-        for ship in ships:
-            if ship.floating:
-                color = Fore.GREEN
-            else:
-                color = Fore.RED
-            name = color + ship.name + Style.RESET_ALL
-            print("%s%s: %s" % (set["space"] * 2, name, ship))
-        print()
-
-    # Print user readable board
-    def print_board(self):
-        header = "%s     " % (set["space"])
-        for col in range(set["board"][0]):
-            if col >= 9:
-                space = "  "
-            else:
-                space = "   "
-            header += str(col + 1) + space
-            i = 1
-        print(header)
-        sub_header = "%s     |%s" % (set["space"],
-                                     "   |" * (set["board"][0] - 1))
-        print(sub_header)
-        print()
-        for row in self.guesses[self.target]:
-            if i >= 10:
-                print_row = "%s%d-  " % (set["space"], i)
-            else:
-                print_row = "%s %d-  " % (set["space"], i)
-            for item in row:
-                if item == "X":
-                    color = Fore.RED
-                elif item == "H":
-                    color = Fore.GREEN
-                elif item == "S":
-                    color = Fore.CYAN
-                else:
-                    color = Fore.BLUE
-                print_row += color + item + Style.RESET_ALL + "   "
-            print_row += "-%d" % (i)
-            print(print_row)
-            print()
-            i += 1
-        print(sub_header)
-        print(header)
-        print()
 
     # Initializes Guesses boards if don't exist
     def init_boards(self, player):
@@ -107,88 +41,37 @@ class Player(object):
 
     # Check if current player is the only one alive
     def is_endgame(self):
-        count = 0
-        for player in self.players:
-            if not self.players[player].is_alive:
-                count += 1
-        if count == len(self.players) - 1:
-            return True
-        else:
-            return False
-
-    # Ask player to give a target
-    def ask_target(self):
-        print("%sPlayers:\n" % (set["space"]))
         for player in self.players.values():
-            if player.key == self.key:
-                player_color = Fore.CYAN
-            elif not player.is_alive:
-                player_color = Fore.RED
-            else:
-                player_color = Fore.GREEN
-
-            print("%s%s%s: %s%s(%s Ships floating)%s"
-                  % (set["space"] * 2, player_color, player.key,
-                     player.name, " " * (35 - len(player.name)),
-                     set["ships"] - player.ships_sunked,
-                     Style.RESET_ALL))
-        print()
-        while True:
-            response_target = input_num("%sChoose a target by player number"
-                                        % (set["space"]), 1, set["players"],
-                                        "int")
-            target = "Player " + str(response_target)
-            if target == self.key:
-                print("%sCannot target yourself" % (set["space"] * 2))
-            elif not self.players[target].is_alive:
-                print("%sCannot target a dead player" % (set["space"] * 2))
-            else:
-                self.target = self.players[target]
-                break
+            if player.key != self.key:
+                if player.is_alive:
+                    return False
+        else:
+            return True
 
     # Choose/determine the target
     def get_target(self):
-        targets = []
-        for player in self.players.values():
-            if player.is_alive:
-                if player.name != self.name:
-                    targets.append([player.key, player.name])
-        if self.ai or len(targets) == 1:
-            target = targets[randint(0, len(targets) - 1)][0]
-            self.target = self.players[target]
+        if self.ai and len(self.hitted) > 0:
+            self.player_guess()
+            return
         else:
-            self.ask_target()
-        print("\n%sTarget: %s %s (%s Ships floating)\n"
-              % (set["space"], self.target.key, self.target.name,
-                 set["ships"] - self.target.ships_sunked))
-
-        self.init_boards(self)
-        self.player_guess()
-        return
-
-    # Player guess
-    def player_guess(self):
-        if not self.ai:
-            if set["cheat"]:
-                print("%sEnemy Ships:" % (set["space"]))
-                self.print_ships()
-            self.print_board()
-        if self.ai:
-            self.guess = [randint(1, set["board"][1]),
-                          randint(1, set["board"][0])]
-            if set["cheat"]:
-                print("%sAI Guess: %s\n" % (set["space"], self.guess))
-        else:
-            self.guess = [input_num("%sGuess Row   " % (set["space"]),
-                                    1, set["board"][1], "int"),
-                          input_num("%sGuess Column" % (set["space"]),
-                                    1, set["board"][0], "int")]
-            print()
-        self.check()
+            targets = []
+            for player in self.players.values():
+                if player.is_alive:
+                    if player.name != self.name:
+                        targets.append([player.key, player.name])
+            if self.ai or len(targets) == 1:
+                target = targets[randint(0, len(targets) - 1)][0]
+                self.target = self.players[target]
+            else:
+                self.ask_target()
+            self.init_boards(self)
+            self.player_guess()
+            return
 
     # Eliminate current target player, checks for endgame
     def eliminate_player(self):
-        self.print_board()
+        if not self.ai:
+            self.print_board()
         self.target.is_alive = False
         print("%s%s%s%s sunked the last ship of %s%s%s!" %
               (set["space"], Style.BRIGHT, self.name, Style.RESET_ALL,
@@ -207,15 +90,30 @@ class Player(object):
     # Register the targets sunked ship in all players guesses board
     def register_ship(self, ship):
         for player in self.players.values():
+
             self.init_boards(player)
             board = player.guesses[self.target]
             for position in ship.positions:
                 board[position[1][0] - 1][position[1][1] - 1] = "S"
+            if self.ai and self.target == player.target and player.hitted:
+                for ship_position in ship.positions:
+                    if player.hitted[0] == ship_position[1]:
+                        player.try_guess = []
+                        player.hitted = []
+                        player.directions = {
+                            "up": True,
+                            "down": True,
+                            "right": True,
+                            "left": True
+                        }
+                        player.direction = None
+                        break
 
     # Ship sunked
     def sink_ship(self, ship):
         self.register_ship(ship)
-        self.print_board()
+        if not self.ai:
+            self.print_board()
         ship.floating = False
         self.target.ships_sunked += 1
         if self.target.ships_sunked == set["ships"]:
@@ -245,13 +143,14 @@ class Player(object):
                 ship.hits += 1
                 if ship.hits == ship.size:
                     self.sink_ship(ship)
+                    return
             print("%s%s%s%s %shitted%s %s%s%s %s.\n"
                   % (set["space"], Style.BRIGHT, self.name,
                      Style.RESET_ALL, Fore.GREEN, Style.RESET_ALL,
                      Style.BRIGHT, self.target.name, Style.RESET_ALL,
                      ship.name))
             if self.ai:
-                sleep(set["timeout"])
+                self.hitted.append(self.guess)
             self.player_guess()
             return
         else:
@@ -261,6 +160,8 @@ class Player(object):
 
     # Register the wrong guess in the guesses board
     def missed(self):
+        if self.direction:
+            self.directions[self.direction] = False
         board = self.guesses[self.target]
         if (board[self.guess[0] - 1][self.guess[1] - 1] == "X"):
             if self.ai:
@@ -268,17 +169,19 @@ class Player(object):
             else:
                 print("%s%s already guessed that position\n"
                       % (set["space"], self.name))
+                return
         else:
             board[self.guess[0] - 1][self.guess[1] - 1] = "X"
             print("%s%s%s%s %smissed%s the shot.\n"
                   % (set["space"], Style.BRIGHT, self.name, Style.RESET_ALL,
                      Fore.RED, Style.RESET_ALL))
+            return
 
     # Check guess
     def check(self):
         for ship in self.target.ships:
             for position in ship.positions:
-                if position[1] == [self.guess[0], self.guess[1]]:
+                if position[1] == self.guess:
                     self.hit(ship, position)
                     return
         else:

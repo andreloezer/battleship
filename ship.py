@@ -55,7 +55,7 @@ class Ship(object):
     # Create ship with size bigger than 1
     def create_ship(self):
         while True:
-            if set["randomize"] or self.player.ai:
+            if not self.player.choose_ship or self.player.ai:
                 if self.direction in (None, "random"):
                     self.direction = self.gen_direction()
                 if self.direction == "horizontal":
@@ -110,16 +110,16 @@ class Ship(object):
         print("%s%s direction: %s"
               % (set["space"] * 2, self.name, self.direction))
         if self.direction == "horizontal":
-            hor = input_num("%sChoose row" % (set["space"]),
+            hor = input_num("%sChoose row" % (set["space"] * 2),
                             1, set["board"][1], "int")
-            ver = input_num("%sChoose starting column" % (set["space"]),
+            ver = input_num("%sChoose starting column" % (set["space"] * 2),
                             1, set["board"][0] - self.size, "int") - 1
         elif self.direction == "vertical":
-            ver = input_num("%sChoose col" % (set["space"]),
-                            1, set["board"][0], "int")
-            hor = input_num("%sChoose starting row" % (set["space"]),
-                            1, set["board"][1] - self.size, "int") - 1
-        ship = self.create_ship(hor, ver)
+            ver = input_num("%sChoose col" % (set["space"] * 2),
+                            1, set["board"][0] - self.size, "int")
+            hor = input_num("%sChoose starting row" % (set["space"] * 2),
+                            1, set["board"][1], "int") - 1
+        ship = self.gen_ship(hor, ver)
         return ship
 
     # Player chooses the ship position
@@ -146,7 +146,7 @@ class Ship(object):
                 if ship_position[1] == [row, col]:
                     if not (set["randomize"] or self.player.ai):
                         print("\n%sPosition already occupied"
-                              % (set["space"] * 2))
+                              % (set["space"] * 3))
                     return False
                 elif ship_position[1] in [[row - 1, col],
                                           [row + 1, col],
@@ -154,7 +154,7 @@ class Ship(object):
                                           [row, col + 1]]:
                     if not (set["randomize"] or self.player.ai):
                         print("\n%sToo close to another ship"
-                              % (set["space"] * 2))
+                              % (set["space"] * 3))
                     return False
         else:
             return True

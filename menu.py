@@ -16,6 +16,10 @@ def menu():
         randomize_color = Fore.GREEN
     else:
         randomize_color = Fore.RED
+    if set["smart"]:
+        smart_color = Fore.GREEN
+    else:
+        smart_color = Fore.RED
     print("\n========================")
     print("====== %sBattleship%s ======" % (Back.BLUE, Style.RESET_ALL))
     print("========================\n")
@@ -31,6 +35,8 @@ def menu():
           % (randomize_color, set["randomize"], Style.RESET_ALL))
     print("AI players (a)          Current: %d" % (set["ai"]))
     print("AI pause time (t)       Current: %ss" % (set["timeout"]))
+    print("AI smart (as)     Current: %s%s%s"
+          % (smart_color, set["smart"], Style.RESET_ALL))
     print("Restore default (d)")
     print("Exit/Quit (e/q)\n")
 
@@ -83,6 +89,14 @@ def menu():
                     "cheat"):
         set["cheat"] = not set["cheat"]
         print("Cheat: %s" % (set["cheat"]))
+        print()
+        menu()
+        return
+    elif answer in ("as",
+                    "ai smart",
+                    "smart"):
+        set["smart"] = not set["smart"]
+        print("smart: %s" % (set["smart"]))
         print()
         menu()
         return
