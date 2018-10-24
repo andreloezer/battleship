@@ -21,7 +21,7 @@ captains = ["Captain Jack Sparrow",
 class NewGame(object):
     def __init__(self):
         self.rounds = 0
-        self.players = {}
+        self.players = []
         self.names = deepcopy(captains)
 
     def start(self):
@@ -30,20 +30,18 @@ class NewGame(object):
         # Initialize each Player(class)
         # Human players
         for player in range(set["players"] - set["ai"]):
-            key = "Player %s" % (player + 1)
-            self.players[key] = Human()
+            self.players.append(Human())
         # AI players
         for player in range(set["ai"]):
-            key = ("Player %s" % (player + 1 + (set["players"] - set["ai"])))
-            self.players[key] = Machine()
+            self.players.append(Machine())
 
         # Loop trought turns
         while True:
             self.rounds += 1
             print("\n******** Round %d ********\n" % (self.rounds))
 
-            for key, player in self.players.items():
+            for index, player in enumerate(self.players):
                 if player.is_alive:
-                    print("%s(%s) Turn\n" % (player.name, key))
+                    print("%s(Player %s) Turn\n" % (player.name, index + 1))
                     player.get_target()
         return

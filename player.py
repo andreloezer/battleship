@@ -38,7 +38,7 @@ class Player(object):
 
     # Check if current player is the only one alive
     def is_endgame(self):
-        for player in menu.game.players.values():
+        for player in menu.game.players:
             if player != self:
                 if player.is_alive:
                     return False
@@ -52,7 +52,7 @@ class Player(object):
             return
         else:
             targets = []
-            for player in menu.game.players.values():
+            for player in menu.game.players:
                 if player.is_alive:
                     if player != self:
                         targets.append([player, player.name])
@@ -87,7 +87,7 @@ class Player(object):
 
     # Register the targets sunked ship in all players guesses board
     def register_ship(self, ship):
-        for player in menu.game.players.values():
+        for player in menu.game.players:
 
             self.init_boards(player)
             board = player.guesses[self.target]

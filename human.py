@@ -84,7 +84,7 @@ class Human(Player):
     # Ask player to give a target
     def ask_target(self):
         print("%sPlayers:\n" % (set["space"]))
-        for key, player in menu.game.players.items():
+        for index, player in enumerate(menu.game.players):
             if player == self:
                 player_color = Fore.CYAN
             elif not player.is_alive:
@@ -92,8 +92,8 @@ class Human(Player):
             else:
                 player_color = Fore.GREEN
 
-            print("%s%s%s: %s%s(%s Ships floating)%s"
-                  % (set["space"] * 2, player_color, key,
+            print("%s%sPlayer %s: %s%s(%s Ships floating)%s"
+                  % (set["space"] * 2, player_color, index + 1,
                      player.name, " " * (35 - len(player.name)),
                      set["ships"] - player.ships_sunked,
                      Style.RESET_ALL))
@@ -102,7 +102,7 @@ class Human(Player):
             response_target = input_num("%sChoose a target by player number"
                                         % (set["space"]), 1, set["players"],
                                         "int")
-            target = "Player " + str(response_target)
+            target = response_target - 1
             if menu.game.players[target] == self:
                 print("%sCannot target yourself" % (set["space"] * 2))
             elif not menu.game.players[target].is_alive:
