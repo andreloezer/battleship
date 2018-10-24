@@ -45,31 +45,21 @@ class Player(object):
         else:
             return True
 
-    # Choose/determine the target
-    def get_target(self):
-        if self.ai and len(self.hitted) > 0:
-            self.player_guess()
-            return
-        else:
-            targets = []
-            for player in menu.game.players:
-                if player.is_alive:
-                    if player != self:
-                        targets.append([player, player.name])
-            if self.ai or len(targets) == 1:
-                target = targets[randint(0, len(targets) - 1)][0]
-                self.target = target
-
-            else:
-                self.ask_target()
-            self.init_boards(self)
-            self.player_guess()
-            return
+    # List valid targets
+    def list_targets(self):
+        targets = []
+        for player in menu.game.players:
+            if player.is_alive:
+                if player != self:
+                    targets.append({"player": player, "name": player.name})
+        return targets
 
     # Eliminate current target player, checks for endgame
     def eliminate_player(self):
+        """
         if not self.ai:
             self.print_board()
+        """
         self.target.is_alive = False
         print("%s%s%s%s sunked the last ship of %s%s%s!" %
               (set["space"], Style.BRIGHT, self.name, Style.RESET_ALL,
@@ -106,12 +96,12 @@ class Player(object):
                         }
                         player.direction = None
                         break
+        if not self.ai:
+            self.print_board()
 
     # Ship sunked
     def sink_ship(self, ship):
         self.register_ship(ship)
-        if not self.ai:
-            self.print_board()
         ship.floating = False
         self.target.ships_sunked += 1
         if self.target.ships_sunked == set["ships"]:

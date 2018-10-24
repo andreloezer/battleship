@@ -81,6 +81,17 @@ class Human(Player):
         print(header)
         print()
 
+    # Choose/determine the target
+    def get_target(self):
+        targets = self.list_targets()
+        if len(targets) == 1:
+            self.target = targets[0]["player"]
+        else:
+            self.ask_target()
+        self.init_boards(self)
+        self.player_guess()
+        return
+
     # Ask player to give a target
     def ask_target(self):
         print("%sPlayers:\n" % (set["space"]))
@@ -123,4 +134,3 @@ class Human(Player):
                                 1, set["board"][0], "int")]
         print()
         self.check()
-        self.print_board()

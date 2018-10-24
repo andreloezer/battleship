@@ -24,6 +24,18 @@ class Machine(Player):
         }
         self.smart = set["smart"]
 
+    # Choose/determine the target
+    def get_target(self):
+        if len(self.hitted) > 0:
+            self.player_guess()
+            return
+        else:
+            targets = self.list_targets()
+            self.target = targets[randint(0, len(targets) - 1)]["player"]
+        self.init_boards(self)
+        self.player_guess()
+        return
+
     # Validate guess position
     def is_position_valid(self, position, direction):
         board = self.guesses[self.target]
@@ -70,7 +82,7 @@ class Machine(Player):
     def player_guess(self):
         sleep(set["timeout"])
         if self.smart and self.guess in self.hitted:
-            # Last guess hit
+            # Determine the direction of the ship
             if len(self.hitted) > 1:
                 # horizontal
                 if self.hitted[0][1] - self.hitted[1][1] != 0:
