@@ -34,8 +34,7 @@ class NewGame(object):
             self.players[key] = Human()
         # AI players
         for player in range(set["ai"]):
-            key = ("Player %s"
-                   % (player + 1 + (set["players"] - set["ai"])))
+            key = ("Player %s" % (player + 1 + (set["players"] - set["ai"])))
             self.players[key] = Machine()
 
         # Loop trought turns
@@ -43,10 +42,8 @@ class NewGame(object):
             self.rounds += 1
             print("\n******** Round %d ********\n" % (self.rounds))
 
-            for player in self.players:
-
-                if self.players[player].is_alive is True:
-                    print("%s(%s) Turn\n"
-                          % (self.players[player].name, player))
-                    self.players[player].get_target()
+            for player in self.players.values():
+                if player.is_alive:
+                    print("%s(%s) Turn\n" % (player.name, player))
+                    player.get_target()
         return
