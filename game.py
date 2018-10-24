@@ -42,8 +42,8 @@ class NewGame(object):
             self.rounds += 1
             print("\n******** Round %d ********\n" % (self.rounds))
 
-            for player in self.players.values():
+            for key, player in self.players.items():
                 if player.is_alive:
-                    print("%s(%s) Turn\n" % (player.name, player))
+                    print("%s(%s) Turn\n" % (player.name, key))
                     player.get_target()
         return
