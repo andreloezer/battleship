@@ -18,34 +18,35 @@ captains = ["Captain Jack Sparrow",
             "Admiral General Aladeen"]
 
 
-# Each game
-def game():
-    rounds = 0
-    players = {}
-    print("\n======= New Game =======")
+class NewGame(object):
+    def __init__(self):
+        self.rounds = 0
+        self.players = {}
+        self.names = deepcopy(captains)
 
-    names = deepcopy(captains)
+    def start(self):
+        print("\n======= New Game =======")
 
-    # Initialize each Player(class)
-    # Human players
-    for player in range(set["players"] - set["ai"]):
-        key = "Player %s" % (player + 1)
-        players[key] = Human(players, key, names)
-    # AI players
-    for player in range(set["ai"]):
-        key = ("Player %s"
-               % (player + 1 + (set["players"] - set["ai"])))
-        players[key] = Machine(players, key, names)
+        # Initialize each Player(class)
+        # Human players
+        for player in range(set["players"] - set["ai"]):
+            key = "Player %s" % (player + 1)
+            self.players[key] = Human()
+        # AI players
+        for player in range(set["ai"]):
+            key = ("Player %s"
+                   % (player + 1 + (set["players"] - set["ai"])))
+            self.players[key] = Machine()
 
-    # Loop trought turns
-    while True:
-        rounds += 1
-        print("\n******** Round %d ********\n" % (rounds))
+        # Loop trought turns
+        while True:
+            self.rounds += 1
+            print("\n******** Round %d ********\n" % (self.rounds))
 
-        for player in players:
+            for player in self.players:
 
-            if players[player].is_alive is True:
-                print("%s(%s) Turn\n" % (players[player].name, player))
-                players[player].get_target()
-
-    return
+                if self.players[player].is_alive is True:
+                    print("%s(%s) Turn\n"
+                          % (self.players[player].name, player))
+                    self.players[player].get_target()
+        return

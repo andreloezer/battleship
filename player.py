@@ -8,11 +8,8 @@ from ship import Ship
 
 # Player class
 class Player(object):
-    def __init__(self, players, key, names):
+    def __init__(self):
         self.is_alive = True
-        self.names = names
-        self.players = players
-        self.key = key
         self.ships = []
         self.ships_sunked = 0
         self.guesses = {}
@@ -25,8 +22,8 @@ class Player(object):
                                    + str(ship + 1), set["size"]))
 
     def give_name(self):
-        name = self.names[randint(0, len(self.names) - 1)]
-        self.names.remove(name)
+        name = menu.game.names[randint(0, len(menu.game.names) - 1)]
+        menu.game.names.remove(name)
         return name
 
     # Initializes Guesses boards if don't exist
@@ -41,8 +38,8 @@ class Player(object):
 
     # Check if current player is the only one alive
     def is_endgame(self):
-        for player in self.players.values():
-            if player.key != self.key:
+        for player in menu.game.players.values():
+            if player != self:
                 if player.is_alive:
                     return False
         else:
@@ -55,13 +52,14 @@ class Player(object):
             return
         else:
             targets = []
-            for player in self.players.values():
+            for player in menu.game.players.values():
                 if player.is_alive:
-                    if player.name != self.name:
-                        targets.append([player.key, player.name])
+                    if player != self:
+                        targets.append([player, player.name])
             if self.ai or len(targets) == 1:
                 target = targets[randint(0, len(targets) - 1)][0]
-                self.target = self.players[target]
+                self.target = target
+
             else:
                 self.ask_target()
             self.init_boards(self)
@@ -89,7 +87,7 @@ class Player(object):
 
     # Register the targets sunked ship in all players guesses board
     def register_ship(self, ship):
-        for player in self.players.values():
+        for player in menu.game.players.values():
 
             self.init_boards(player)
             board = player.guesses[self.target]
@@ -186,7 +184,3 @@ class Player(object):
                     return
         else:
             self.missed()
-        if self.ai:
-            sleep(set["timeout"])
-        else:
-            self.print_board()

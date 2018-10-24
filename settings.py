@@ -2,14 +2,14 @@ from copy import deepcopy
 
 # Default settings
 default = {
-    "board": [12, 12],
+    "board": [8, 8],
     "cheat": True,
     "ships": 2,
-    "players": 8,
+    "players": 3,
     "randomize": True,
-    "ai": 8,
+    "ai": 2,
     "timeout": 0.001,
-    "size": 9,
+    "size": 4,
     "smart": True,
     "space": "  "
   }

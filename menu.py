@@ -2,7 +2,10 @@ from sys import exit
 from colorama import Fore, Back, Style
 from settings import settings as set, default as dv, interval as inr
 from functions import input_num
-from game import game
+from game import NewGame
+
+
+game = None
 
 
 # Starting screen with some options
@@ -49,7 +52,10 @@ def menu():
                   "new game",
                   "new_game",
                   "newgame"):
-        game()
+
+        global game
+        game = NewGame()
+        game.start()
         return
     elif answer in ("b",
                     "size",

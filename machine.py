@@ -6,8 +6,8 @@ from player import Player
 
 
 class Machine(Player):
-    def __init__(self, players, key, names):
-        Player.__init__(self, players, key, names)
+    def __init__(self):
+        Player.__init__(self)
         self.ai = True
         self.choose_ship = False
         self.hitted = []
@@ -94,4 +94,5 @@ class Machine(Player):
                           randint(1, set["board"][0])]
         if set["cheat"]:
             print("%sAI Guess: %s\n" % (set["space"], self.guess))
+        sleep(set["timeout"])
         self.check()

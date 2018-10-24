@@ -4,13 +4,13 @@ from functions import input_num
 
 
 from player import Player
+import menu
 
 
 class Human(Player):
-    def __init__(self, players, key, names):
-        Player.__init__(self, players, key, names)
+    def __init__(self):
+        Player.__init__(self)
         self.ai = False
-        print("\n\n%s" % (self.key))
         self.ask_name()
         if set["randomize"]:
             self.choose_ship = False
@@ -84,8 +84,8 @@ class Human(Player):
     # Ask player to give a target
     def ask_target(self):
         print("%sPlayers:\n" % (set["space"]))
-        for player in self.players.values():
-            if player.key == self.key:
+        for key, player in menu.game.players.items():
+            if player == self:
                 player_color = Fore.CYAN
             elif not player.is_alive:
                 player_color = Fore.RED
@@ -93,7 +93,7 @@ class Human(Player):
                 player_color = Fore.GREEN
 
             print("%s%s%s: %s%s(%s Ships floating)%s"
-                  % (set["space"] * 2, player_color, player.key,
+                  % (set["space"] * 2, player_color, key,
                      player.name, " " * (35 - len(player.name)),
                      set["ships"] - player.ships_sunked,
                      Style.RESET_ALL))
@@ -103,12 +103,12 @@ class Human(Player):
                                         % (set["space"]), 1, set["players"],
                                         "int")
             target = "Player " + str(response_target)
-            if target == self.key:
+            if menu.game.players[target] == self:
                 print("%sCannot target yourself" % (set["space"] * 2))
-            elif not self.players[target].is_alive:
+            elif not menu.game.players[target].is_alive:
                 print("%sCannot target a dead player" % (set["space"] * 2))
             else:
-                self.target = self.players[target]
+                self.target = menu.game.players[target]
                 break
 
     # Ask player for a guess
@@ -123,3 +123,4 @@ class Human(Player):
                                 1, set["board"][0], "int")]
         print()
         self.check()
+        self.print_board()
