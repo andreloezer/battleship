@@ -1,4 +1,5 @@
 from copy import deepcopy
+from random import randint
 
 from settings import settings as set
 from human import Human
@@ -34,6 +35,13 @@ class NewGame(object):
         # AI players
         for player in range(set["ai"]):
             self.players.append(Machine())
+
+        # Randomize players list
+        random_list = []
+        while len(self.players) > 0:
+            random_list.append(self.players.pop(randint(0, len(self.players)
+                                                        - 1)))
+        self.players = random_list
 
         # Loop trought turns
         while True:

@@ -93,6 +93,7 @@ class Machine(Player):
             self.guess = [randint(1, set["board"][1]),
                           randint(1, set["board"][0])]
         if set["cheat"]:
+            print("%sAI Target: %s" % (set["space"], self.target.name))
             print("%sAI Guess: %s\n" % (set["space"], self.guess))
         sleep(set["timeout"])
         self.check()
