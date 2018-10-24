@@ -7,12 +7,11 @@ from functions import input_num
 
 # Ship Class
 class Ship(object):
-    def __init__(self, player, ships, name, size=1, direction="random"):
+    def __init__(self, player, name, size=1, direction="random"):
         self.floating = True
         self.size = size
         self.direction = direction
         self.player = player
-        self.ships = ships
         self.name = name
         self.hits = 0
         self.positions = []
@@ -30,10 +29,10 @@ class Ship(object):
     def __str__(self):
         string = ""
         for position in self.positions:
-            if position[0]:
-                string += Fore.GREEN + str(position[1])
+            if position["floating"]:
+                string += Fore.GREEN + str(position["coord"])
             else:
-                string += Fore.RED + str(position[1])
+                string += Fore.RED + str(position["coord"])
         return string
 
     def gen_ship(self, hor, ver):
@@ -46,7 +45,7 @@ class Ship(object):
             elif self.direction == "vertical":
                 position = [hor + point + 1, ver]
             if self.validate(position):
-                positions.append([True, position])
+                positions.append({"floating": True, "coord": position})
             else:
                 return False
         else:
@@ -141,7 +140,7 @@ class Ship(object):
     def validate(self, position):
         row = position[0]
         col = position[1]
-        for ship in self.ships:
+        for ship in self.player.ships:
             for ship_position in ship.positions:
                 if ship_position[1] == [row, col]:
                     if not (set["randomize"] or self.player.ai):

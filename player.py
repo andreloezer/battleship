@@ -18,7 +18,7 @@ class Player(object):
     # Initializes ships class
     def init_ships(self):
         for ship in range(set["ships"]):
-            self.ships.append(Ship(self, self.ships, "Ship "
+            self.ships.append(Ship(self, "Ship "
                                    + str(ship + 1), set["size"]))
 
     def give_name(self):
@@ -56,10 +56,6 @@ class Player(object):
 
     # Eliminate current target player, checks for endgame
     def eliminate_player(self):
-        """
-        if not self.ai:
-            self.print_board()
-        """
         self.target.is_alive = False
         print("%s%s%s%s sunked the last ship of %s%s%s!" %
               (set["space"], Style.BRIGHT, self.name, Style.RESET_ALL,
@@ -82,7 +78,8 @@ class Player(object):
             self.init_boards(player)
             board = player.guesses[self.target]
             for position in ship.positions:
-                board[position[1][0] - 1][position[1][1] - 1] = "S"
+                board[position["coord"][0] - 1][position["coord"][1] - 1] = "S"
+
             if self.ai and self.target == player.target and player.hitted:
                 for ship_position in ship.positions:
                     if player.hitted[0] == ship_position[1]:
@@ -126,8 +123,8 @@ class Player(object):
         board = self.guesses[self.target]
         if board[self.guess[0] - 1][self.guess[1] - 1] == "O":
             board[self.guess[0] - 1][self.guess[1] - 1] = "H"
-            if position[0]:
-                position[0] = False
+            if position["floating"]:
+                position["floating"] = False
                 ship.hits += 1
                 if ship.hits == ship.size:
                     self.sink_ship(ship)
@@ -169,7 +166,7 @@ class Player(object):
     def check(self):
         for ship in self.target.ships:
             for position in ship.positions:
-                if position[1] == self.guess:
+                if position["coord"] == self.guess:
                     self.hit(ship, position)
                     return
         else:
