@@ -1,6 +1,10 @@
 from settings import settings as set
 
 
+def offset():
+    return set["board"][1] * 2
+
+
 def check_int(user_input):
     try:
         user_input = int(user_input)

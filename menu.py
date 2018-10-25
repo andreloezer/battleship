@@ -1,7 +1,7 @@
 from sys import exit
 from colorama import Fore, Back, Style
 from settings import settings as set, default as dv, interval as inr
-from functions import input_num
+from functions import input_num, offset
 from game import NewGame
 
 
@@ -23,9 +23,12 @@ def menu():
         smart_color = Fore.GREEN
     else:
         smart_color = Fore.RED
-    print("\n========================")
-    print("====== %sBattleship%s ======" % (Back.BLUE, Style.RESET_ALL))
-    print("========================\n")
+    print("\n\n%s" % ((offset() + 5) * '=' * 2))
+    print("%s %sBattleship%s %s" % ((offset() - 1) * '=',
+                                    Back.BLUE,
+                                    Style.RESET_ALL,
+                                    (offset() - 1) * '='))
+    print("%s\n" % ((offset() + 5) * '=' * 2))
     print("New Game (g)")
     print("Board Size (b)          Current: (%d, %d)"
           % (set["board"][0], set["board"][1]))
