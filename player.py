@@ -14,6 +14,7 @@ class Player(object):
         self.ships_sunked = 0
         self.guesses = {}
         self.guess = []
+        self.init_boards(self, self)
 
     # Initializes ships class
     def init_ships(self):
@@ -28,14 +29,16 @@ class Player(object):
         return name
 
     # Initializes Guesses boards if don't exist
-    def init_boards(self, player):
+    def init_boards(self, player, target=False):
+        if not target:
+            target = self.target
         try:
-            player.guesses[self.target]
+            player.guesses[target]
         except KeyError:
-            player.guesses[self.target] = []
+            player.guesses[target] = []
             for row in range(set["board"][1]):
-                player.guesses[self.target].append(["O"]
-                                                   * set["board"][0])
+                player.guesses[target].append(["O"]
+                                              * set["board"][0])
 
     # Check if current player is the only one alive
     def is_endgame(self):
@@ -124,8 +127,10 @@ class Player(object):
         if self.ai and set["cheat"]:
             self.cheat()
         board = self.guesses[self.target]
+        board_player = self.target.guesses[self.target]
         if board[self.guess[0] - 1][self.guess[1] - 1] == "O":
             board[self.guess[0] - 1][self.guess[1] - 1] = "H"
+            board_player[self.guess[0] - 1][self.guess[1] - 1] = "H"
             if position["floating"]:
                 position["floating"] = False
                 ship.hits += 1
@@ -151,6 +156,7 @@ class Player(object):
         if self.ai and self.direction:
             self.directions[self.direction] = False
         board = self.guesses[self.target]
+        board_player = self.target.guesses[self.target]
         if (board[self.guess[0] - 1][self.guess[1] - 1] == "X"):
             if self.ai:
                 self.player_guess()
@@ -162,6 +168,7 @@ class Player(object):
             if self.ai and set["cheat"]:
                 self.cheat()
             board[self.guess[0] - 1][self.guess[1] - 1] = "X"
+            board_player[self.guess[0] - 1][self.guess[1] - 1] = "X"
             print("%s%s%s%s %smissed%s the shot.\n"
                   % (set["space"], Style.BRIGHT, self.name, Style.RESET_ALL,
                      Fore.RED, Style.RESET_ALL))

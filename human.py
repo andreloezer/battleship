@@ -45,7 +45,9 @@ class Human(Player):
                   % (set["space"] * 2, self.name))
 
     # Print user readable board
-    def print_board(self):
+    def print_board(self, target=False):
+        if not target:
+            target = self.target
         header = "%s     " % (set["space"])
         for col in range(set["board"][0]):
             if col >= 9:
@@ -59,7 +61,7 @@ class Human(Player):
                                      "   |" * (set["board"][0] - 1))
         print(sub_header)
         print()
-        for row in self.guesses[self.target]:
+        for row in self.guesses[target]:
             if i >= 10:
                 print_row = "%s%d-  " % (set["space"], i)
             else:
@@ -84,6 +86,8 @@ class Human(Player):
 
     # Choose/determine the target
     def get_target(self):
+        print("Your board:\n")
+        self.print_board(self)
         targets = self.list_targets()
         if len(targets) == 1:
             self.target = targets[0]["player"]

@@ -2,25 +2,6 @@ from copy import deepcopy
 from math import floor
 
 
-# Default settings
-default = {
-    "board": [10, 10],  # Board Size [num of rows, num of cols]
-    "cheat": True,  # Display other players ships and guesses
-    "ships": 1,  # Number of ships
-    "players": 3,  # Number of players
-    "randomize": True,  # Randomize players ships
-    "ai": 2,  # Number of AI players
-    "timeout": 0.1,  # Timeout between AI moves
-    "smart": True,  # AI smart guessing after a hit
-    "decoy": True,  # Decoy doesn't count as a ship
-    "space": "  "  # Indentation of prints
-  }
-
-
-# User settings
-settings = deepcopy(default)
-
-
 # Settings values interval
 interval = {
     "board": [lambda ships: int(floor(ships)) * 1.5, 25],
@@ -57,3 +38,27 @@ types = [{"type": "Dreadnought", "size": 6, "quantity": 1},
          {"type": "Corvette", "size": 3, "quantity": 2},
          {"type": "PT Boat", "size": 2, "quantity": 0},
          {"type": "Decoy", "size": 1, "quantity": 1}]
+
+
+# Default settings
+default = {
+    "board": [10, 10],  # Board Size [num of rows, num of cols]
+    "cheat": True,  # Display other players ships and guesses
+    "players": 2,  # Number of players
+    "randomize": True,  # Randomize players ships
+    "ai": 1,  # Number of AI players
+    "timeout": 0.1,  # Timeout between AI moves
+    "smart": True,  # AI smart guessing after a hit
+    "decoy": True,  # Decoy doesn't count as a ship
+    "space": "  "  # Indentation of prints
+}
+
+
+default["ships"] = 0
+for ship_type in types:
+    if ship_type["type"] != "Decoy" or not default["decoy"]:
+        default["ships"] += ship_type["quantity"]
+
+
+# User settings
+settings = deepcopy(default)
