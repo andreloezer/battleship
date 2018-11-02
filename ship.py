@@ -7,7 +7,7 @@ from functions import input_num
 
 # Ship Class
 class Ship(object):
-    def __init__(self, player, name, size=1, direction="random"):
+    def __init__(self, player, name, size, direction="random"):
         self.floating = True
         self.size = size
         self.direction = direction
@@ -142,15 +142,15 @@ class Ship(object):
         col = position[1]
         for ship in self.player.ships:
             for ship_position in ship.positions:
-                if ship_position[1] == [row, col]:
+                if ship_position["coord"] == [row, col]:
                     if not (set["randomize"] or self.player.ai):
                         print("\n%sPosition already occupied"
                               % (set["space"] * 3))
                     return False
-                elif ship_position[1] in [[row - 1, col],
-                                          [row + 1, col],
-                                          [row, col - 1],
-                                          [row, col + 1]]:
+                elif ship_position["coord"] in [[row - 1, col],
+                                                [row + 1, col],
+                                                [row, col - 1],
+                                                [row, col + 1]]:
                     if not (set["randomize"] or self.player.ai):
                         print("\n%sToo close to another ship"
                               % (set["space"] * 3))

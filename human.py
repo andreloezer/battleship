@@ -33,7 +33,8 @@ class Human(Player):
             else:
                 color = Fore.RED
             name = color + ship.name + Style.RESET_ALL
-            print("%s%s: %s" % (set["space"] * 2, name, ship))
+            print("%s%s: %s%s" % (set["space"] * 2, name,
+                                  " " * (12 - len(ship.name)), ship))
         print()
 
     def ask_name(self):

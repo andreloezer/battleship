@@ -55,28 +55,46 @@ class Machine(Player):
     # Generate guess position
     def next_guesses(self):
         self.try_guess = []
-        i = 0
-        while len(self.try_guess) == 0:
-            i += 1
+        for guess in self.hitted:
             if self.directions["up"]:
-                position = [self.guess[0] - i,
-                            self.guess[1]]
+                position = [guess[0] - 1,
+                            guess[1]]
                 self.is_position_valid(position, "up")
 
             if self.directions["down"]:
-                position = [self.guess[0] + i,
-                            self.guess[1]]
+                position = [guess[0] + 1,
+                            guess[1]]
                 self.is_position_valid(position, "down")
 
             if self.directions["left"]:
-                position = [self.guess[0],
-                            self.guess[1] - i]
+                position = [guess[0],
+                            guess[1] - 1]
                 self.is_position_valid(position, "left")
 
             if self.directions["right"]:
-                position = [self.guess[0],
-                            self.guess[1] + i]
+                position = [guess[0],
+                            guess[1] + 1]
                 self.is_position_valid(position, "right")
+        # It's a decoy
+        if not (self.directions["up"] or
+                self.directions["down"] or
+                self.directions["left"] or
+                self.directions["right"]):
+            self.try_guess = []
+            self.hitted = []
+            self.directions = {
+                "up": True,
+                "down": True,
+                "right": True,
+                "left": True
+            }
+            self.direction = None
+            self.random_guess()
+
+    # Random guess
+    def random_guess(self):
+        self.guess = [randint(1, set["board"][1]),
+                      randint(1, set["board"][0])]
 
     # Player guess
     def player_guess(self):
@@ -96,16 +114,17 @@ class Machine(Player):
         if self.smart and len(self.hitted) > 0:
             if len(self.try_guess) == 0:
                 self.next_guesses()
-            guess = self.try_guess.pop(randint(0,
-                                               len(self.try_guess) - 1))
-            self.direction = guess[1]
-            self.guess = guess[0]
+            if len(self.hitted) > 0:
+                guess = self.try_guess.pop(randint(0,
+                                                   len(self.try_guess) - 1))
+                self.direction = guess[1]
+                self.guess = guess[0]
         else:
             # Random guess
-            self.guess = [randint(1, set["board"][1]),
-                          randint(1, set["board"][0])]
-        if set["cheat"]:
-            print("%sAI Target: %s" % (set["space"], self.target.name))
-            print("%sAI Guess: %s\n" % (set["space"], self.guess))
+            self.random_guess()
         sleep(set["timeout"])
         self.check()
+
+    def cheat(self):
+        print("%sAI Target: %s" % (set["space"], self.target.name))
+        print("%sAI Guess: %s\n" % (set["space"], self.guess))

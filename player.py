@@ -1,7 +1,7 @@
 from random import randint
 from time import sleep
 from colorama import Fore, Style
-from settings import settings as set
+from settings import settings as set, types
 import menu
 from ship import Ship
 
@@ -17,9 +17,10 @@ class Player(object):
 
     # Initializes ships class
     def init_ships(self):
-        for ship in range(set["ships"]):
-            self.ships.append(Ship(self, "Ship "
-                                   + str(ship + 1), set["size"]))
+        for type in types:
+            for ship in range(type["quantity"]):
+                self.ships.append(Ship(self, type["type"],
+                                       type["size"]))
 
     def give_name(self):
         name = menu.game.names[randint(0, len(menu.game.names) - 1)]
@@ -51,7 +52,7 @@ class Player(object):
         for player in menu.game.players:
             if player.is_alive:
                 if player != self:
-                    targets.append({"player": player, "name": player.name})
+                    targets.append({"player": player, "type": player.name})
         return targets
 
     # Eliminate current target player, checks for endgame
@@ -82,7 +83,7 @@ class Player(object):
 
             if self.ai and self.target == player.target and player.hitted:
                 for ship_position in ship.positions:
-                    if player.hitted[0] == ship_position[1]:
+                    if player.hitted[0] == ship_position["coord"]:
                         player.try_guess = []
                         player.hitted = []
                         player.directions = {
@@ -104,11 +105,11 @@ class Player(object):
         if self.target.ships_sunked == set["ships"]:
             self.eliminate_player()
         else:
-            print("%s%s%s%s %ssunked%s %s%s%s %s."
+            print("%s%s%s%s %ssunked%s a %s from %s%s%s."
                   % (set["space"], Style.BRIGHT, self.name,
                      Style.RESET_ALL, Fore.GREEN, Style.RESET_ALL,
-                     Style.BRIGHT, self.target.name,
-                     Style.RESET_ALL, ship.name))
+                     ship.name, Style.BRIGHT, self.target.name,
+                     Style.RESET_ALL))
             print("%s%s%s%s have %d ships left.\n"
                   % (set["space"], Style.BRIGHT, self.target.name,
                      Style.RESET_ALL, set["ships"]
@@ -120,20 +121,22 @@ class Player(object):
 
     # Hit a ship
     def hit(self, ship, position):
+        if self.ai and set["cheat"]:
+            self.cheat()
         board = self.guesses[self.target]
         if board[self.guess[0] - 1][self.guess[1] - 1] == "O":
             board[self.guess[0] - 1][self.guess[1] - 1] = "H"
             if position["floating"]:
                 position["floating"] = False
                 ship.hits += 1
-                if ship.hits == ship.size:
+                if ship.hits == ship.size and \
+                   not (set["decoy"] and ship.name == "Decoy"):
                     self.sink_ship(ship)
                     return
-            print("%s%s%s%s %shitted%s %s%s%s %s.\n"
+            print("%s%s%s%s %shitted%s something in %s%s%s board.\n"
                   % (set["space"], Style.BRIGHT, self.name,
                      Style.RESET_ALL, Fore.GREEN, Style.RESET_ALL,
-                     Style.BRIGHT, self.target.name, Style.RESET_ALL,
-                     ship.name))
+                     Style.BRIGHT, self.target.name, Style.RESET_ALL))
             if self.ai:
                 self.hitted.append(self.guess)
             self.player_guess()
@@ -156,6 +159,8 @@ class Player(object):
                       % (set["space"], self.name))
                 return
         else:
+            if self.ai and set["cheat"]:
+                self.cheat()
             board[self.guess[0] - 1][self.guess[1] - 1] = "X"
             print("%s%s%s%s %smissed%s the shot.\n"
                   % (set["space"], Style.BRIGHT, self.name, Style.RESET_ALL,

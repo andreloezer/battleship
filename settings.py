@@ -1,18 +1,19 @@
 from copy import deepcopy
+from math import floor
 
 
 # Default settings
 default = {
-    "board": [5, 5],
-    "cheat": True,
-    "ships": 1,
-    "players": 2,
-    "randomize": True,
-    "ai": 1,
-    "timeout": 0.05,
-    "size": 2,
-    "smart": True,
-    "space": "  "
+    "board": [10, 10],  # Board Size [num of rows, num of cols]
+    "cheat": True,  # Display other players ships and guesses
+    "ships": 1,  # Number of ships
+    "players": 3,  # Number of players
+    "randomize": True,  # Randomize players ships
+    "ai": 2,  # Number of AI players
+    "timeout": 0.1,  # Timeout between AI moves
+    "smart": True,  # AI smart guessing after a hit
+    "decoy": True,  # Decoy doesn't count as a ship
+    "space": "  "  # Indentation of prints
   }
 
 
@@ -22,15 +23,20 @@ settings = deepcopy(default)
 
 # Settings values interval
 interval = {
-    "board": [3, 15],
-    "ships": [1, lambda size: ((size[0] + size[1]) / 2) * 0.6],
+    "board": [lambda ships: int(floor(ships)) * 1.5, 25],
     "players": [2, 8],
     "ai": [0, lambda ai: ai - 1],
     "timeout": [0, 5],
-    "size": [1, 5]
+    "Dreadnought": [0, 1],
+    "Destroyer": [0, 1],
+    "Frigate": [0, 2],
+    "Corvette": [1, 2],
+    "PT Boat": [1, 3],
+    "Decoy": [0, 2]
 }
 
 
+# Names for AI players and nameless humans
 captains = ["Captain Jack Sparrow",
             "Captain James T. Kirk",
             "Captain Ahab",
@@ -42,3 +48,12 @@ captains = ["Captain Jack Sparrow",
             "Captain Hook",
             "Captain Han Solo",
             "Admiral General Aladeen"]
+
+
+# Ship types
+types = [{"type": "Dreadnought", "size": 6, "quantity": 1},
+         {"type": "Destroyer", "size": 5, "quantity": 0},
+         {"type": "Frigate", "size": 4, "quantity": 0},
+         {"type": "Corvette", "size": 3, "quantity": 2},
+         {"type": "PT Boat", "size": 2, "quantity": 0},
+         {"type": "Decoy", "size": 1, "quantity": 1}]
