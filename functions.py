@@ -24,10 +24,12 @@ def check_float(user_input):
 
 
 # User input and validation
-def input_num(message, min_value, max_value, type):
+def input_num(message, min_value, max_value, type, escape=False):
     while True:
         user_input = input("%s (%d to %d): "
                            % (message, min_value, max_value))
+        if escape and user_input.lower() == escape:
+            return False
         if type == "int":
             user_input = check_int(user_input)
         elif type == "float":

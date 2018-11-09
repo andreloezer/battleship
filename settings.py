@@ -42,11 +42,11 @@ types = [{"type": "Dreadnought", "size": 6, "quantity": 1},
 
 # Default settings
 default = {
-    "board": [10, 10],  # Board Size [num of rows, num of cols]
+    "board": [10, 12],  # Board Size [num of rows, num of cols]
     "cheat": True,  # Display other players ships and guesses
-    "players": 2,  # Number of players
+    "players": 3,  # Number of players
     "randomize": True,  # Randomize players ships
-    "ai": 1,  # Number of AI players
+    "ai": 2,  # Number of AI players
     "timeout": 0.1,  # Timeout between AI moves
     "smart": True,  # AI smart guessing after a hit
     "decoy": True,  # Decoy doesn't count as a ship

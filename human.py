@@ -129,13 +129,24 @@ class Human(Player):
 
     # Ask player for a guess
     def player_guess(self):
+        self.guess = []
+        print("\nTargets board:\n")
         if set["cheat"]:
             print("%sEnemy Ships:" % (set["space"]))
             self.print_ships()
         self.print_board()
-        self.guess = [input_num("%sGuess Row   " % (set["space"]),
-                                1, set["board"][1], "int"),
-                      input_num("%sGuess Column" % (set["space"]),
-                                1, set["board"][0], "int")]
+        return_key = "r"
+        guessing = ("Row", "Col")
+        for count, value in enumerate(guessing):
+            answer = input_num("%sGuess %s   ('%s' to return)" % (set["space"],
+                                                                  value,
+                                                                  return_key),
+                               1, set["board"][1 - count], "int", return_key)
+            if answer:
+                self.guess.append(answer)
+            else:
+                self.get_target()
+                return
+        print("Guess: %s" % self.guess)
         print()
         self.check()

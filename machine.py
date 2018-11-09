@@ -15,7 +15,6 @@ class Machine(Player):
         self.name = self.give_name()
         self.init_ships()
         self.direction = None
-        self.target = None
         self.directions = {
             "up": True,
             "down": True,

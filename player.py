@@ -12,6 +12,7 @@ class Player(object):
         self.is_alive = True
         self.ships = []
         self.ships_sunked = 0
+        self.target = None
         self.guesses = {}
         self.guess = []
         self.init_boards(self, self)
@@ -138,6 +139,8 @@ class Player(object):
                    not (set["decoy"] and ship.name == "Decoy"):
                     self.sink_ship(ship)
                     return
+            if not self.ai:
+                self.print_board()
             print("%s%s%s%s %shitted%s something in %s%s%s board.\n"
                   % (set["space"], Style.BRIGHT, self.name,
                      Style.RESET_ALL, Fore.GREEN, Style.RESET_ALL,
@@ -161,6 +164,7 @@ class Player(object):
             if self.ai:
                 self.player_guess()
             else:
+                self.print_board()
                 print("%s%s already guessed that position\n"
                       % (set["space"], self.name))
                 return
@@ -169,6 +173,8 @@ class Player(object):
                 self.cheat()
             board[self.guess[0] - 1][self.guess[1] - 1] = "X"
             board_player[self.guess[0] - 1][self.guess[1] - 1] = "X"
+            if not self.ai:
+                self.print_board()
             print("%s%s%s%s %smissed%s the shot.\n"
                   % (set["space"], Style.BRIGHT, self.name, Style.RESET_ALL,
                      Fore.RED, Style.RESET_ALL))
