@@ -52,7 +52,6 @@ class Machine(Player):
 
     # Player guess
     def player_guess(self, hitted=False):
-        guess = []
         # Smart Guessing ship still floating
         if self.smart_guess and self.still_floating(self.smart_guess.hits[0]):
             # Smart Guessing guess hitted
