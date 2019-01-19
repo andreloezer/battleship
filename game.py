@@ -47,9 +47,13 @@ class NewGame(object):
         # Loop trought turns
         while True:
             self.rounds += 1
+            if self.rounds < 10:
+                off_right = 1
+            else:
+                off_right = 0
             print("\n%s Round %d %s\n" % (offset() * '=',
                                           self.rounds,
-                                          (offset() + 1) * '='))
+                                          (offset() + off_right) * '='))
 
             for index, player in enumerate(self.players):
                 if player.is_alive:

@@ -52,7 +52,7 @@ default = {
     "smart": True,  # AI smart guessing after a hit
     "decoy": True,  # Decoy doesn't count as a ship
     "space": "  ",  # Indentation of prints
-    "shots": 4  # Number of shots of a salvo
+    "shots": 1  # Number of shots of a salvo
 }
 
 

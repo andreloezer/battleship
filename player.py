@@ -66,33 +66,30 @@ class Player(object):
             self.print_board(self)
         if status == "guess" or not self.target.is_alive:
             self.get_target()
-        if status in ("guess", "hit"):
+        # Guess
+        if status in ("guess", "hit") or set["shots"] <= 1:
             if not self.ai:
                 self.print_board()
             if status == "guess":
                 guess = self.player_guess()
-            elif status == "hit" or (status == "shots" and set["shots"] <= 1):
+            elif status == "hit" or set["shots"] <= 1:
                 guess = self.player_guess(True)
             if self.ai and set["cheat"]:
                 self.cheat(guess)
+            # Check guess
             result = self.check(guess)
-            if not self.ai and not self.salvo and status not in ("hit",
-                                                                 "sink",
-                                                                 "eliminate",
-                                                                 "guess"):
-                self.print_board()
+            # Print result
             self.print_result(result)
+        # Salvo
         elif status in ("sink", "eliminate") and set["shots"] > 1:
             if not self.ai:
                 self.print_board()
             self.salvo = Salvo(self)
             self.salvo.get_shots()
+            # Check salvo
             result = self.salvo.check_shots()
             self.salvo = None
-            if result in ("hit", "eliminate", "sink"):
-                self.move(result)
-            return
-
+        # Guess did not miss
         if result in ("hit", "eliminate", "sink"):
             self.move(result)
         elif result == "win":
@@ -135,8 +132,10 @@ class Player(object):
 
     # Ship sunked
     def sink_ship(self, ship):
-        self.register_ship(ship)
         ship.floating = False
+        self.register_ship(ship)
+        if self.ai and self.smart_guess:
+            self.smart_guess = None
         self.target.ships_sunked += 1
         if self.target.ships_sunked == set["ships"]:
             return self.eliminate_player()
@@ -199,7 +198,7 @@ class Player(object):
                 print("%s%s%s%s is the %swinner%s!!!\n"
                       % (set["space"], Style.BRIGHT, self.name,
                          Style.RESET_ALL, Fore.GREEN, Style.RESET_ALL))
-            else:
+            elif set["shots"] > 1:
                 print("%s%s%s%s was awarded with a Salvo of %i shots\n"
                       % (set["space"], Style.BRIGHT, self.name,
                          Style.RESET_ALL, set["shots"]))

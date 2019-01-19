@@ -90,7 +90,7 @@ def options():
     print("%s %sOptions%s %s" % (offset() * '=',
                                  Back.BLUE,
                                  Style.RESET_ALL,
-                                 offset() * '='))
+                                 (offset() + 1) * '='))
 
     print("\nThere are %d ships%s:" % (set["ships"], decoys))
     for ship_type in types:
