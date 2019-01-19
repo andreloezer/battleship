@@ -7,6 +7,7 @@ from human import Human
 from machine import Machine
 
 
+# Captains names
 captains = ["Captain Jack Sparrow",
             "Captain James T. Kirk",
             "Captain Ahab",
@@ -20,6 +21,7 @@ captains = ["Captain Jack Sparrow",
             "Admiral General Aladeen"]
 
 
+# Game class
 class NewGame(object):
     def __init__(self):
         self.rounds = 0
@@ -29,7 +31,6 @@ class NewGame(object):
     def start(self):
         print("\n%s New Game %s" % (offset() * '=',
                                     offset() * '='))
-
         # Initialize each Player(class)
         # Human players
         for player in range(set["players"] - set["ai"]):
@@ -37,14 +38,12 @@ class NewGame(object):
         # AI players
         for player in range(set["ai"]):
             self.players.append(Machine())
-
         # Randomize players list
         random_list = []
         while len(self.players) > 0:
             random_list.append(self.players.pop(randint(0, len(self.players)
                                                         - 1)))
         self.players = random_list
-
         # Loop trought turns
         while True:
             self.rounds += 1
@@ -54,6 +53,8 @@ class NewGame(object):
 
             for index, player in enumerate(self.players):
                 if player.is_alive:
-                    print("%s(Player %s) Turn\n" % (player.name, index + 1))
-                    player.get_target()
+                    print("\n\n%s(Player %s) Turn\n\n" %
+                          (player.name, index + 1))
+                    player.status = "guess"
+                    player.move("guess")
         return

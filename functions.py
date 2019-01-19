@@ -1,10 +1,12 @@
 from settings import settings as set
 
 
+# Define offset for printing menu messages
 def offset():
     return set["board"][1] * 2
 
 
+# Ensure input is a integer
 def check_int(user_input):
     try:
         user_input = int(user_input)
@@ -14,6 +16,7 @@ def check_int(user_input):
         return user_input
 
 
+# Ensure input is a float
 def check_float(user_input):
     try:
         user_input = float(user_input)

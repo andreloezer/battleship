@@ -9,6 +9,7 @@ from game import NewGame
 game = None
 
 
+# Main menu
 def menu():
     print("\n\n%s" % ((offset() + 5) * '=' * 2))
     print("%s %sBattleship%s %s" % ((offset() - 1) * '=',
@@ -108,6 +109,7 @@ def options():
           % (set["board"][0], set["board"][1]))
     print("Number of Players (p)   Current: %d" % (set["players"]))
     print("AI Players (a)          Current: %d" % (set["ai"]))
+    print("Salvo shots (ss)        Current: %d" % (set["shots"]))
     print("AI Pause Time (t)       Current: %ss" % (set["timeout"]))
     print("AI Smart Guessing (sg)  Current: %s%s%s"
           % (smart_color, set["smart"], Style.RESET_ALL))
@@ -186,8 +188,8 @@ def options():
                     "ships",
                     "choose ships"):
         for type in types:
-            type["quantity"] = input_num("Choose the quantity of %s"
-                                         % type["type"],
+            type["quantity"] = input_num("Choose the quantity of %s (Size: %s)"
+                                         % (type["type"], type["size"]),
                                          inr[type["type"]][0],
                                          inr[type["type"]][1], "int")
             if type["type"] != "Decoy":
@@ -241,6 +243,17 @@ def options():
                               inr["ai"][0],
                               inr["ai"][1](set["players"]),
                               "int")
+        options()
+        return
+    elif answer in ("ss",
+                    "salvo",
+                    "shots",
+                    "salvo shots",
+                    "salvo_shots"):
+        set["shots"] = input_num("Choose the number of shots during a Salvo",
+                                 inr["shots"][0],
+                                 inr["shots"][1],
+                                 "int")
         options()
         return
     elif answer in ("t",

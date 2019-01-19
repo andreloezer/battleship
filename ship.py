@@ -17,6 +17,7 @@ class Ship(object):
         self.positions = []
         self.create_ship()
 
+    # Generate a random direction for the ship
     def gen_direction(self):
         if self.size == 1:
             return None
@@ -26,6 +27,7 @@ class Ship(object):
             else:
                 return self.direction
 
+    # Prepare a string for printing the Ship class (used on cheat)
     def __str__(self):
         string = ""
         for position in self.positions:
@@ -35,6 +37,7 @@ class Ship(object):
                 string += Fore.RED + str(position["coord"])
         return string
 
+    # Place the ship at a random and valid place
     def gen_ship(self, hor, ver):
         positions = []
         if self.direction is None:
@@ -88,6 +91,7 @@ class Ship(object):
         col = randint(1, set["board"][0])
         return [row, col]
 
+    # Ask human player for a direction for the ship
     def ask_direction(self):
         while True:
             direction = input("%sChoose the direction" % (set["space"])
@@ -103,6 +107,7 @@ class Ship(object):
             else:
                 print("%sEnter a valid direction" % (set["space"]))
 
+    # Ask human player for the starting position of the ship
     def ask_position_length(self):
         print("\n%s%s (lenght: %d)" % (set["space"], self.name, self.size))
         self.direction = self.ask_direction()

@@ -26,6 +26,7 @@ class Human(Player):
 
     # Print own ships
     def print_ships(self):
+        print("%sEnemy Ships:" % (set["space"]))
         ships = self.target.ships
         for ship in ships:
             if ship.floating:
@@ -37,6 +38,7 @@ class Human(Player):
                                   " " * (12 - len(ship.name)), ship))
         print()
 
+    # Ask for the name of the human player
     def ask_name(self):
         self.name = input("\n%sChoose a name: " % (set["space"]))
         if not self.name:
@@ -46,8 +48,13 @@ class Human(Player):
 
     # Print user readable board
     def print_board(self, target=False):
-        if not target:
+        if target:
+            print("Your board:\n")
+        else:
+            print("\nTargets board:\n")
             target = self.target
+            if set["cheat"]:
+                self.print_ships()
         header = "%s     " % (set["space"])
         for col in range(set["board"][0]):
             if col >= 9:
@@ -86,16 +93,12 @@ class Human(Player):
 
     # Choose/determine the target
     def get_target(self):
-        print("Your board:\n")
-        self.print_board(self)
         targets = self.list_targets()
         if len(targets) == 1:
             self.target = targets[0]["player"]
         else:
             self.ask_target()
         self.init_boards(self)
-        self.player_guess()
-        return
 
     # Ask player to give a target
     def ask_target(self):
@@ -107,7 +110,6 @@ class Human(Player):
                 player_color = Fore.RED
             else:
                 player_color = Fore.GREEN
-
             print("%s%sPlayer %s: %s%s(%s Ships floating)%s"
                   % (set["space"] * 2, player_color, index + 1,
                      player.name, " " * (35 - len(player.name)),
@@ -127,26 +129,33 @@ class Human(Player):
                 self.target = menu.game.players[target]
                 break
 
-    # Ask player for a guess
-    def player_guess(self):
-        self.guess = []
-        print("\nTargets board:\n")
-        if set["cheat"]:
-            print("%sEnemy Ships:" % (set["space"]))
-            self.print_ships()
-        self.print_board()
+    # Ask guess
+    def get_guess(self):
         return_key = "r"
         guessing = ("Row", "Col")
-        for count, value in enumerate(guessing):
-            answer = input_num("%sGuess %s   ('%s' to return)" % (set["space"],
-                                                                  value,
-                                                                  return_key),
-                               1, set["board"][1 - count], "int", return_key)
-            if answer:
-                self.guess.append(answer)
+        guess = []
+        for count, axis in enumerate(guessing):
+            if set["players"] > 2:
+                answer = input_num("%sGuess %s   ('%s' to return)" %
+                                   (set["space"], axis, return_key), 1,
+                                   set["board"][(len(guessing) - 1) - count],
+                                   "int", return_key)
             else:
-                self.get_target()
-                return
-        print("Guess: %s" % self.guess)
+                answer = input_num("%sGuess %s" %
+                                   (set["space"], axis), 1,
+                                   set["board"][(len(guessing) - 1) - count],
+                                   "int")
+            if answer:
+                guess.append(answer)
+            else:
+                return False
+        return guess
+
+    # Ask player for a guess
+    def player_guess(self, hitted=False):
+        guess = self.get_guess()
+        while not guess:
+            self.get_target()
+            guess = self.get_guess()
         print()
-        self.check()
+        return guess

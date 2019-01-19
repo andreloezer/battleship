@@ -1,8 +1,8 @@
 from random import randint
-from time import sleep
 
 from settings import settings as set
 from player import Player
+from smart import Smart_Guessing
 
 
 class Machine(Player):
@@ -10,120 +10,79 @@ class Machine(Player):
         Player.__init__(self)
         self.ai = True
         self.choose_ship = False
-        self.hitted = []
-        self.try_guess = []
         self.name = self.give_name()
         self.init_ships()
-        self.direction = None
-        self.directions = {
-            "up": True,
-            "down": True,
-            "right": True,
-            "left": True
-        }
         self.smart = set["smart"]
+        self.smart_guess = None
 
     # Choose/determine the target
     def get_target(self):
-        if len(self.hitted) > 0:
-            self.player_guess()
-            return
-        else:
+        if len(self.hits) == 0:
             targets = self.list_targets()
             self.target = targets[randint(0, len(targets) - 1)]["player"]
         self.init_boards(self)
-        self.player_guess()
-        return
 
     # Validate guess position
-    def is_position_valid(self, position, direction):
+    def is_position_valid(self, position, direction=None):
         board = self.guesses[self.target]
         col = range(1, set["board"][1] + 1)
         row = range(1, set["board"][0] + 1)
         if position[0] in col and position[1] in row:
             # Position in board
             if board[position[0] - 1][position[1] - 1] == "O":
-                self.try_guess.append([position, direction])
+                return True
             elif board[position[0] - 1][position[1] - 1] == "X":
                 # Remove direction
-                self.directions[direction] = False
+                return False
         else:
             # Position not in board
             self.directions[direction] = False
 
-    # Generate guess position
-    def next_guesses(self):
-        self.try_guess = []
-        for guess in self.hitted:
-            if self.directions["up"]:
-                position = [guess[0] - 1,
-                            guess[1]]
-                self.is_position_valid(position, "up")
-
-            if self.directions["down"]:
-                position = [guess[0] + 1,
-                            guess[1]]
-                self.is_position_valid(position, "down")
-
-            if self.directions["left"]:
-                position = [guess[0],
-                            guess[1] - 1]
-                self.is_position_valid(position, "left")
-
-            if self.directions["right"]:
-                position = [guess[0],
-                            guess[1] + 1]
-                self.is_position_valid(position, "right")
-        # It's a decoy
-        if not (self.directions["up"] or
-                self.directions["down"] or
-                self.directions["left"] or
-                self.directions["right"]):
-            self.try_guess = []
-            self.hitted = []
-            self.directions = {
-                "up": True,
-                "down": True,
-                "right": True,
-                "left": True
-            }
-            self.direction = None
-            self.random_guess()
-
     # Random guess
     def random_guess(self):
-        self.guess = [randint(1, set["board"][1]),
-                      randint(1, set["board"][0])]
+        return [randint(1, set["board"][1]),
+                randint(1, set["board"][0])]
+
+    def still_floating(self, hit):
+        board = self.guesses[self.target]
+        if board[hit[0] - 1][hit[1] - 1] == "S":
+            return False
+        else:
+            return True
 
     # Player guess
-    def player_guess(self):
-        sleep(set["timeout"])
-        if self.smart and self.guess in self.hitted:
-            # Determine the direction of the ship
-            if len(self.hitted) > 1:
-                # horizontal
-                if self.hitted[0][1] - self.hitted[1][1] != 0:
-                    self.directions["up"] = False
-                    self.directions["down"] = False
-                # vertical
-                elif self.hitted[0][0] - self.hitted[1][0] != 0:
-                    self.directions["right"] = False
-                    self.directions["left"] = False
-            self.next_guesses()
-        if self.smart and len(self.hitted) > 0:
-            if len(self.try_guess) == 0:
-                self.next_guesses()
-            if len(self.hitted) > 0:
-                guess = self.try_guess.pop(randint(0,
-                                                   len(self.try_guess) - 1))
-                self.direction = guess[1]
-                self.guess = guess[0]
+    def player_guess(self, hitted=False):
+        guess = []
+        # Smart Guessing ship still floating
+        if self.smart_guess and self.still_floating(self.smart_guess.hits[0]):
+            # Smart Guessing guess hitted
+            if hitted and self.hits[-1]["target"] == self.smart_guess.target:
+                self.smart_guess.hits.append(self.hits.pop()["position"])
+            guess = self.smart_guess.shoot()
+        # No Smart Guessing
         else:
-            # Random guess
-            self.random_guess()
-        sleep(set["timeout"])
-        self.check()
+            while len(self.hits) > 0:
+                hit = self.hits.pop()
+                if self.still_floating(hit["position"]):
+                    self.smart_guess = Smart_Guessing(self, hit)
+                    guess = self.smart_guess.shoot()
+                    break
+            else:
+                self.smart_guess = None
+                guess = self.get_guess()
+        if not guess:
+            self.smart_guess = None
+            guess = self.player_guess()
+        return guess
 
-    def cheat(self):
+    # Random guess
+    def get_guess(self):
+        while True:
+            guess = self.random_guess()
+            if self.is_position_valid(guess):
+                return guess
+
+    # Display guessing info of the AI
+    def cheat(self, guess):
         print("%sAI Target: %s" % (set["space"], self.target.name))
-        print("%sAI Guess: %s\n" % (set["space"], self.guess))
+        print("%sAI Guess: %s\n" % (set["space"], guess))
