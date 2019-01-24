@@ -7,6 +7,7 @@ from settings import settings as set, types
 import menu
 from ship import Ship
 from salvo import Salvo
+from score import Score
 
 
 # Player class
@@ -19,6 +20,7 @@ class Player(object):
         self.guesses = {}
         self.salvo = None
         self.hits = []
+        self.score = Score(self)
         self.init_boards(self, self)
 
     # Print own ships
@@ -67,21 +69,23 @@ class Player(object):
         if status == "guess" or not self.target.is_alive:
             self.get_target()
         # Guess
-        if status in ("guess", "hit") or set["shots"] <= 1:
+        if status in ("guess", "hits") or set["shots"] <= 1:
             if not self.ai:
                 self.print_board()
             if status == "guess":
                 guess = self.player_guess()
-            elif status == "hit" or set["shots"] <= 1:
+            elif status == "hits" or set["shots"] <= 1:
                 guess = self.player_guess(True)
             if self.ai and set["cheat"]:
                 self.cheat(guess)
             # Check guess
             result = self.check(guess)
+            # Register score
+            self.score.add(result)
             # Print result
             self.print_result(result)
         # Salvo
-        elif status in ("sink", "eliminate") and set["shots"] > 1:
+        elif status in ("sinks", "eliminates") and set["shots"] > 1:
             if not self.ai:
                 self.print_board()
             self.salvo = Salvo(self)
@@ -90,10 +94,10 @@ class Player(object):
             result = self.salvo.check_shots()
             self.salvo = None
         # Guess did not miss
-        if result in ("hit", "eliminate", "sink"):
+        if result in ("hits", "eliminates", "sinks"):
             self.move(result)
         elif result == "win":
-            menu.menu()
+            menu.game.endgame()
 
     # Check if current player is the only one alive
     def is_endgame(self):
@@ -120,7 +124,7 @@ class Player(object):
         if self.is_endgame():
             return "win"
         else:
-            return "eliminate"
+            return "eliminates"
 
     # Register the targets sunked ship in all players guesses board
     def register_ship(self, ship):
@@ -141,7 +145,7 @@ class Player(object):
             return self.eliminate_player()
         else:
             self.ship = ship.name
-            return "sink"
+            return "sinks"
 
     # Hit a ship
     def hit(self, ship, position, guess):
@@ -160,7 +164,7 @@ class Player(object):
             if self.ai:
                 self.hits.append({"position": guess,
                                  "target": self.target})
-            return "hit"
+            return "hits"
         else:
             return "already hitted"
 
@@ -174,7 +178,7 @@ class Player(object):
         else:
             board[guess[0] - 1][guess[1] - 1] = "X"
             board_player[guess[0] - 1][guess[1] - 1] = "X"
-            return "miss"
+            return "misses"
 
     # Check guess
     def check(self, guess):
@@ -187,7 +191,7 @@ class Player(object):
 
     # Print the result of the guess
     def print_result(self, result):
-        if result in ("eliminate", "win"):
+        if result in ("eliminates", "win"):
             print("%s%s%s%s sunked the last ship of %s%s%s!" %
                   (set["space"], Style.BRIGHT, self.name, Style.RESET_ALL,
                    Style.BRIGHT, self.target.name, Style.RESET_ALL))
@@ -203,7 +207,7 @@ class Player(object):
                       % (set["space"], Style.BRIGHT, self.name,
                          Style.RESET_ALL, set["shots"]))
         else:
-            if result == "hit":
+            if result == "hits":
                 print("%s%s%s%s %shitted%s something in %s%s%s board.\n"
                       % (set["space"], Style.BRIGHT, self.name,
                          Style.RESET_ALL, Fore.GREEN, Style.RESET_ALL,
@@ -214,11 +218,11 @@ class Player(object):
             elif result == "already guessed":
                 print("%s%s already guessed that position\n"
                       % (set["space"], self.name))
-            elif result == "miss":
+            elif result == "misses":
                 print("%s%s%s%s %smissed%s the shot.\n"
                       % (set["space"], Style.BRIGHT, self.name,
                          Style.RESET_ALL, Fore.RED, Style.RESET_ALL))
-            elif result == "sink":
+            elif result == "sinks":
                 print("%s%s%s%s %ssunked%s a %s from %s%s%s."
                       % (set["space"], Style.BRIGHT, self.name,
                          Style.RESET_ALL, Fore.GREEN, Style.RESET_ALL,

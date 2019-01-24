@@ -1,10 +1,13 @@
+
 from copy import deepcopy
 from random import randint
+
 
 from settings import settings as set
 from functions import offset
 from human import Human
 from machine import Machine
+import menu
 
 
 # Captains names
@@ -28,6 +31,7 @@ class NewGame(object):
         self.players = []
         self.names = deepcopy(captains)
 
+    # Game start
     def start(self):
         print("\n%s New Game %s" % (offset() * '=',
                                     offset() * '='))
@@ -57,8 +61,16 @@ class NewGame(object):
 
             for index, player in enumerate(self.players):
                 if player.is_alive:
-                    print("\n\n%s(Player %s) Turn\n\n" %
-                          (player.name, index + 1))
-                    player.status = "guess"
+                    print("\n\nPlayer %d (%s) Turn\n\n" %
+                          (index + 1, player.name))
                     player.move("guess")
-        return
+
+    # Game ends
+    def endgame(self):
+        print("\n\n%s Players Scores %s\n" % ((offset() - 2) * '=',
+                                              (offset() - 2) * '='))
+        for index, player in enumerate(self.players):
+            print("\nPlayer %d (%s)\n" % (index + 1, player.name))
+            player.score.print_score()
+        input("%sPress Enter to continue..." % set["space"])
+        menu.menu()

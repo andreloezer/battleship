@@ -34,7 +34,7 @@ captains = ["Captain Jack Sparrow",
 
 # Ship types
 types = [{"type": "Dreadnought", "size": 6, "quantity": 0},
-         {"type": "Destroyer", "size": 5, "quantity": 1},
+         {"type": "Destroyer", "size": 5, "quantity": 0},
          {"type": "Frigate", "size": 4, "quantity": 2},
          {"type": "Corvette", "size": 3, "quantity": 2},
          {"type": "PT Boat", "size": 2, "quantity": 2},

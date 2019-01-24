@@ -34,6 +34,7 @@ def menu():
         global game
         game = NewGame()
         game.start()
+        game.endgame()
         return
     elif answer in ("a",
                     "o",

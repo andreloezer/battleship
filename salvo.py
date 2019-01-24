@@ -43,18 +43,20 @@ class Salvo(object):
                 print("%s%s Shot: %s" % (set["space"], self.player.name,
                                          guess))
             result = self.player.check(guess)
+            # Register score
+            self.score.add(result)
             self.player.print_result(result)
-            if result == "hit":
+            if result == "hits":
                 self.hits.append(guess)
-            if result == "sink":
+            if result == "sinks":
                 self.hits.append(guess)
                 self.sink = True
             if result == "win":
                 return "win"
         else:
             if self.sink:
-                return "sink"
+                return "sinks"
             elif len(self.hits) > 0:
-                return "hit"
+                return "hits"
             else:
-                return "miss"
+                return "misses"
