@@ -74,6 +74,10 @@ def options():
         decoy_color = Fore.GREEN
     else:
         decoy_color = Fore.RED
+    if set["scores"]:
+        scores_color = Fore.GREEN
+    else:
+        decoy_color = Fore.RED
     set["ships"] = 0
     for ship_type in types:
         if ship_type["type"] != "Decoy" or not set["decoy"]:
@@ -120,6 +124,8 @@ def options():
           % (debug_color, set["cheat"], Style.RESET_ALL))
     print("Randomize Ships (r)     Current: %s%s%s"
           % (randomize_color, set["randomize"], Style.RESET_ALL))
+    print("Players Scores (sc)     Current: %s%s%s"
+          % (scores_color, set["scores"], Style.RESET_ALL))
     print("Restore Default (d)")
     print("Back to menu (m)")
     print()
@@ -232,6 +238,13 @@ def options():
                     "randomizeships"):
         set["randomize"] = not set["randomize"]
         print("Randomize Ships: %s" % (set["randomize"]))
+        print()
+        options()
+        return
+    elif answer in ("sc",
+                    "scores"):
+        set["scores"] = not set["scores"]
+        print("Players Scores: %s" % (set["scores"]))
         print()
         options()
         return

@@ -1,5 +1,7 @@
 
+
 from settings import settings as set
+import menu
 
 
 class Salvo(object):
@@ -42,10 +44,10 @@ class Salvo(object):
             if set["cheat"]:
                 print("%s%s Shot: %s" % (set["space"], self.player.name,
                                          guess))
-            result = self.player.check(guess)
+            result = menu.game.check(self.player, guess)
             # Register score
-            self.score.add(result)
-            self.player.print_result(result)
+            self.player.score.add(result)
+            menu.game.print_result(self.player, result)
             if result == "hits":
                 self.hits.append(guess)
             if result == "sinks":
