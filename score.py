@@ -1,6 +1,6 @@
 
 
-from settings import settings as set
+from settings import settings as sets
 import menu
 
 
@@ -14,10 +14,11 @@ class Score(object):
             "eliminations": 0,
             "misses": 0
         }
+        self.percentages = {}
 
     # Register score
     def add(self, result):
-        if result in ("already hitted", "already guessed", "misses"):
+        if result in ("already hit", "already guessed", "misses"):
             self.score["misses"] += 1
             menu.game.totals["misses"] += 1
         else:
@@ -51,14 +52,14 @@ class Score(object):
     def print_score(self):
         self.evaluate_percentages()
         offset = 15
-        print("%sTotals" % (set["space"] * 2))
+        print("%sTotals" % (sets["space"] * 2))
         for key, value in self.score.items():
-            print("%s%s:%s%d" % (set["space"] * 3, key.capitalize(),
+            print("%s%s:%s%d" % (sets["space"] * 3, key.capitalize(),
                                  (" " * (offset + 6 - len(key) -
                                   len(str(value)))),
                                  value))
-        print("\n%sPercentages" % (set["space"] * 2))
+        print("\n%sPercentages" % (sets["space"] * 2))
         for key, value in self.percentages.items():
-            print("%s%s:%s%5.2f%%" % (set["space"] * 3, key.capitalize(),
+            print("%s%s:%s%5.2f%%" % (sets["space"] * 3, key.capitalize(),
                                       (" " * (offset - len(key))), value))
         print()

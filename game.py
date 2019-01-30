@@ -8,8 +8,8 @@ from time import sleep
 from colorama import Fore, Style
 
 
-from settings import settings as set, captains
-from functions import offset
+from settings import settings as sets, captains
+from functions import offset, clear_screen
 from human import Human
 from machine import Machine
 from salvo import Salvo
@@ -35,10 +35,10 @@ class NewGame(object):
                                     offset() * '='))
         # Initialize each Player(class)
         # Human players
-        for player in range(set["players"] - set["ai"]):
+        for player in range(sets["players"] - sets["ai"]):
             self.players.append(Human())
         # AI players
-        for player in range(set["ai"]):
+        for player in range(sets["ai"]):
             self.players.append(Machine())
         # Randomize players list
         random_list = []
@@ -73,14 +73,15 @@ class NewGame(object):
         if status == "guess" or not player.target.is_alive:
             player.get_target()
         # Guess
-        if status in ("guess", "hits") or set["shots"] <= 1:
+        if status in ("guess", "hits") or sets["shots"] == 1:
             if not player.ai:
                 player.print_board()
             if status == "guess":
                 guess = player.player_guess()
-            elif status == "hits" or set["shots"] <= 1:
+            # When status == "hits"
+            else:
                 guess = player.player_guess(True)
-            if player.ai and set["cheat"]:
+            if player.ai and sets["cheat"]:
                 player.cheat(guess)
             # Check guess
             result = self.check(player, guess)
@@ -89,7 +90,8 @@ class NewGame(object):
             # Print result
             self.print_result(player, result)
         # Salvo
-        elif status in ("sinks", "eliminates") and set["shots"] > 1:
+        # When status is "sinks" or "eliminates" and sets["shots"] > 1
+        else:
             if not player.ai:
                 player.print_board()
             player.salvo = Salvo(player)
@@ -115,10 +117,11 @@ class NewGame(object):
             return self.missed(player, guess)
 
     # Register the wrong guess in the guesses board
-    def missed(self, player, guess):
+    @staticmethod
+    def missed(player, guess):
         board = player.guesses[player.target]
         board_player = player.target.guesses[player.target]
-        if (board[guess[0] - 1][guess[1] - 1] == "X"):
+        if board[guess[0] - 1][guess[1] - 1] == "X":
             if not player.ai:
                 return "already guessed"
         else:
@@ -137,7 +140,7 @@ class NewGame(object):
                 position["floating"] = False
                 ship.hits += 1
                 if ship.hits == ship.size and \
-                   not (set["decoy"] and ship.name == "Decoy"):
+                   not (sets["decoy"] and ship.name == "Decoy"):
                     result = self.sink_ship(player, ship)
                     return result
             if player.ai:
@@ -145,23 +148,24 @@ class NewGame(object):
                                    "target": player.target})
             return "hits"
         else:
-            return "already hitted"
+            return "already hit"
 
-    # Ship sunked
+    # Ship sunken
     def sink_ship(self, player, ship):
         ship.floating = False
         self.register_ship(player, ship)
         if player.ai and player.smart_guess:
             player.smart_guess = None
-        player.target.ships_sunked += 1
-        if player.target.ships_sunked == set["ships"]:
+        player.target.ships_sunken += 1
+        if player.target.ships_sunken == sets["ships"]:
             return self.eliminate_player(player)
         else:
             player.ship = ship.name
             return "sinks"
 
-    # Register the targets sunked ship in all players guesses board
-    def register_ship(self, player, ship):
+    # Register the targets sunken ship in all players guesses board
+    @staticmethod
+    def register_ship(player, ship):
         for enemy in menu.game.players:
             player.init_boards(enemy)
             board = enemy.guesses[player.target]
@@ -178,7 +182,8 @@ class NewGame(object):
             return "eliminates"
 
     # Check if current player is the only one alive
-    def is_endgame(self, player):
+    @staticmethod
+    def is_endgame(player):
         for enemy in menu.game.players:
             if enemy != player:
                 if enemy.is_alive:
@@ -187,66 +192,68 @@ class NewGame(object):
             return True
 
     # Print the result of the guess
-    def print_result(self, player, result):
+    @staticmethod
+    def print_result(player, result):
         if result in ("eliminates", "win"):
-            print("%s%s%s%s sunked the last ship of %s%s%s!" %
-                  (set["space"], Style.BRIGHT, player.name, Style.RESET_ALL,
+            print("%s%s%s%s sunken the last ship of %s%s%s!" %
+                  (sets["space"], Style.BRIGHT, player.name, Style.RESET_ALL,
                    Style.BRIGHT, player.target.name, Style.RESET_ALL))
             print("%s%s%s%s was %seliminated%s from the game.\n" %
-                  (set["space"], Style.BRIGHT, player.target.name,
+                  (sets["space"], Style.BRIGHT, player.target.name,
                    Style.RESET_ALL, Fore.GREEN, Style.RESET_ALL))
             if result == "win":
                 print("%s%s%s%s is the %swinner%s!!!\n"
-                      % (set["space"], Style.BRIGHT, player.name,
+                      % (sets["space"], Style.BRIGHT, player.name,
                          Style.RESET_ALL, Fore.GREEN, Style.RESET_ALL))
-            elif set["shots"] > 1:
-                print("%s%s%s%s was awarded with a Salvo of %i shots\n"
-                      % (set["space"], Style.BRIGHT, player.name,
-                         Style.RESET_ALL, set["shots"]))
+            elif sets["shots"] > 1:
+                print("%s%s%s%s was awarded with a Salvo of %i shots.\n"
+                      % (sets["space"], Style.BRIGHT, player.name,
+                         Style.RESET_ALL, sets["shots"]))
         else:
             if result == "hits":
                 print("%s%s%s%s %shitted%s something in %s%s%s board.\n"
-                      % (set["space"], Style.BRIGHT, player.name,
+                      % (sets["space"], Style.BRIGHT, player.name,
                          Style.RESET_ALL, Fore.GREEN, Style.RESET_ALL,
                          Style.BRIGHT, player.target.name, Style.RESET_ALL))
-            elif result == "already hitted":
-                print("%sPosition was already hitted\n"
-                      % (set["space"]))
+            elif result == "already hit":
+                print("%sPosition was already hit.\n"
+                      % (sets["space"]))
             elif result == "already guessed":
-                print("%s%s already guessed that position\n"
-                      % (set["space"], player.name))
+                print("%s%s already guessed that position.\n"
+                      % (sets["space"], player.name))
             elif result == "misses":
                 print("%s%s%s%s %smissed%s the shot.\n"
-                      % (set["space"], Style.BRIGHT, player.name,
+                      % (sets["space"], Style.BRIGHT, player.name,
                          Style.RESET_ALL, Fore.RED, Style.RESET_ALL))
             elif result == "sinks":
-                print("%s%s%s%s %ssunked%s a %s from %s%s%s."
-                      % (set["space"], Style.BRIGHT, player.name,
+                print("%s%s%s%s %ssunken%s a %s from %s%s%s."
+                      % (sets["space"], Style.BRIGHT, player.name,
                          Style.RESET_ALL, Fore.GREEN, Style.RESET_ALL,
                          player.ship, Style.BRIGHT, player.target.name,
                          Style.RESET_ALL))
                 print("%s%s%s%s have %d ships left.\n"
-                      % (set["space"], Style.BRIGHT, player.target.name,
-                         Style.RESET_ALL, set["ships"]
-                         - player.target.ships_sunked))
-                if set["shots"] > 1:
-                    print("%s%s%s%s was awarded with a Salvo of %i shots\n"
-                          % (set["space"], Style.BRIGHT, player.name,
-                             Style.RESET_ALL, set["shots"]))
+                      % (sets["space"], Style.BRIGHT, player.target.name,
+                         Style.RESET_ALL, sets["ships"]
+                         - player.target.ships_sunken))
+                if sets["shots"] > 1:
+                    print("%s%s%s%s was awarded with a Salvo of %i shots.\n"
+                          % (sets["space"], Style.BRIGHT, player.name,
+                             Style.RESET_ALL, sets["shots"]))
                 player.ship = None
-        sleep(set["timeout"])
+        sleep(sets["timeout"])
 
-    def print_score(self, best_player):
+    @staticmethod
+    def print_score(best_player):
         offset1 = 15
         offset2 = 25
-        print("%sBests Scores\n" % set["space"])
+        print("%sBests Scores\n" % sets["space"])
         for key, value in best_player.items():
             if key == "accuracy":
                 percent = "%"
             else:
                 percent = ""
             print("%s%s:%sPlayer %s (%s)%s(%d%s)" %
-                  (set["space"] * 2, key.capitalize(),
+                  (sets["space"] * 2, key.capitalize(),
                    (" " * (offset1 - len(key))), value["player"].index + 1,
                    value["player"].name,
                    (" " * (offset2 - len(value["player"].name))),
@@ -255,8 +262,8 @@ class NewGame(object):
 
     # Game ends
     def endgame(self):
-        print("\n\n%s Players Scores %s\n" % ((offset() - 2) * '=',
-                                              (offset() - 2) * '='))
+        input("\n%sPress Enter to continue..." % sets["space"])
+        clear_screen()
         best_player = {
             "hits": {"score": 0, "player": None},
             "accuracy": {"score": 0, "player": None},
@@ -269,12 +276,14 @@ class NewGame(object):
                 if player.score.score[key] > best_player[key]["score"]:
                     best_player[key]["score"] = player.score.score[key]
                     best_player[key]["player"] = player
+        print("\n\n%s Players Scores %s\n" % ((offset() - 2) * '=',
+                                              (offset() - 2) * '='))
         self.print_score(best_player)
-        input("%sPress Enter to continue..." % set["space"])
-        if set["scores"]:
+        input("%sPress Enter to continue..." % sets["space"])
+        if sets["scores"]:
             for player in self.players:
                 print("\n%sPlayer %d (%s)\n" %
-                      (set["space"], player.index + 1, player.name))
+                      (sets["space"], player.index + 1, player.name))
                 player.score.print_score()
-            input("%sPress Enter to continue..." % set["space"])
+            input("%sPress Enter to continue..." % sets["space"])
         menu.menu()

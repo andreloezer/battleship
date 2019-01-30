@@ -1,5 +1,5 @@
 from colorama import Fore, Style
-from settings import settings as set
+from settings import settings as sets
 from functions import input_num
 
 
@@ -12,21 +12,21 @@ class Human(Player):
         Player.__init__(self)
         self.ai = False
         self.ask_name()
-        if set["randomize"]:
+        if sets["randomize"]:
             self.choose_ship = False
         else:
             if str(input("%sChoose ships positions? "
-                         % (set["space"]))) in ("y", "yes"):
+                         % (sets["space"]))) in ("y", "yes"):
                 self.choose_ship = True
                 print("\n%s%s position your ships:"
-                      % (set["space"], self.name))
+                      % (sets["space"], self.name))
             else:
                 self.choose_ship = False
         self.init_ships()
 
     # Print own ships
     def print_ships(self):
-        print("%sEnemy Ships:" % (set["space"]))
+        print("%sEnemy Ships:" % (sets["space"]))
         ships = self.target.ships
         for ship in ships:
             if ship.floating:
@@ -34,17 +34,17 @@ class Human(Player):
             else:
                 color = Fore.RED
             name = color + ship.name + Style.RESET_ALL
-            print("%s%s: %s%s" % (set["space"] * 2, name,
+            print("%s%s: %s%s" % (sets["space"] * 2, name,
                                   " " * (12 - len(ship.name)), ship))
         print()
 
     # Ask for the name of the human player
     def ask_name(self):
-        self.name = input("\n%sChoose a name: " % (set["space"]))
+        self.name = input("\n%sChoose a name: " % (sets["space"]))
         if not self.name:
             self.name = self.give_name()
             print("%sRandom name choosen: %s\n"
-                  % (set["space"] * 2, self.name))
+                  % (sets["space"] * 2, self.name))
 
     # Print user readable board
     def print_board(self, target=False):
@@ -53,26 +53,26 @@ class Human(Player):
         else:
             print("\nTargets board:\n")
             target = self.target
-            if set["cheat"]:
+            if sets["cheat"]:
                 self.print_ships()
-        header = "%s     " % (set["space"])
-        for col in range(set["board"][0]):
+        header = "%s     " % (sets["space"])
+        for col in range(sets["board"][0]):
             if col >= 9:
                 space = "  "
             else:
                 space = "   "
             header += str(col + 1) + space
-            i = 1
         print(header)
-        sub_header = "%s     |%s" % (set["space"],
-                                     "   |" * (set["board"][0] - 1))
+        sub_header = "%s     |%s" % (sets["space"],
+                                     "   |" * (sets["board"][0] - 1))
         print(sub_header)
         print()
+        i = 1
         for row in self.guesses[target]:
             if i >= 10:
-                print_row = "%s%d-  " % (set["space"], i)
+                print_row = "%s%d-  " % (sets["space"], i)
             else:
-                print_row = "%s %d-  " % (set["space"], i)
+                print_row = "%s %d-  " % (sets["space"], i)
             for item in row:
                 if item == "X":
                     color = Fore.RED
@@ -83,7 +83,7 @@ class Human(Player):
                 else:
                     color = Fore.BLUE
                 print_row += color + item + Style.RESET_ALL + "   "
-            print_row += "-%d" % (i)
+            print_row += "-%d" % i
             print(print_row)
             print()
             i += 1
@@ -102,7 +102,7 @@ class Human(Player):
 
     # Ask player to give a target
     def ask_target(self):
-        print("%sPlayers:\n" % (set["space"]))
+        print("%sPlayers:\n" % (sets["space"]))
         for index, player in enumerate(menu.game.players):
             if player == self:
                 player_color = Fore.CYAN
@@ -111,39 +111,40 @@ class Human(Player):
             else:
                 player_color = Fore.GREEN
             print("%s%sPlayer %s: %s%s(%s Ships floating)%s"
-                  % (set["space"] * 2, player_color, index + 1,
+                  % (sets["space"] * 2, player_color, index + 1,
                      player.name, " " * (35 - len(player.name)),
-                     set["ships"] - player.ships_sunked,
+                     sets["ships"] - player.ships_sunken,
                      Style.RESET_ALL))
         print()
         while True:
             response_target = input_num("%sChoose a target by player number"
-                                        % (set["space"]), 1, set["players"],
+                                        % (sets["space"]), 1, sets["players"],
                                         "int")
             target = response_target - 1
             if menu.game.players[target] == self:
-                print("%sCannot target yourself" % (set["space"] * 2))
+                print("%sCannot target yourself" % (sets["space"] * 2))
             elif not menu.game.players[target].is_alive:
-                print("%sCannot target a dead player" % (set["space"] * 2))
+                print("%sCannot target a dead player" % (sets["space"] * 2))
             else:
                 self.target = menu.game.players[target]
                 break
 
     # Ask guess
-    def get_guess(self):
+    @staticmethod
+    def get_guess():
         return_key = "r"
         guessing = ("Row", "Col")
         guess = []
         for count, axis in enumerate(guessing):
-            if set["players"] > 2:
+            if sets["players"] > 2:
                 answer = input_num("%sGuess %s   ('%s' to return)" %
-                                   (set["space"], axis, return_key), 1,
-                                   set["board"][(len(guessing) - 1) - count],
+                                   (sets["space"], axis, return_key), 1,
+                                   sets["board"][(len(guessing) - 1) - count],
                                    "int", return_key)
             else:
                 answer = input_num("%sGuess %s" %
-                                   (set["space"], axis), 1,
-                                   set["board"][(len(guessing) - 1) - count],
+                                   (sets["space"], axis), 1,
+                                   sets["board"][(len(guessing) - 1) - count],
                                    "int")
             if answer:
                 guess.append(answer)
@@ -152,7 +153,9 @@ class Human(Player):
         return guess
 
     # Ask player for a guess
-    def player_guess(self, hitted=False):
+    def player_guess(self, hits=False):
+        if hits:
+            print("%sYou were awarded with another shot!\n" % sets["space"])
         guess = self.get_guess()
         while not guess:
             self.get_target()

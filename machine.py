@@ -1,8 +1,11 @@
+
+
 from random import randint
 
-from settings import settings as set
+
+from settings import settings as sets
 from player import Player
-from smart import Smart_Guessing
+from smart import SmartGuessing
 
 
 class Machine(Player):
@@ -12,7 +15,7 @@ class Machine(Player):
         self.choose_ship = False
         self.name = self.give_name()
         self.init_ships()
-        self.smart = set["smart"]
+        self.smart = sets["smart"]
         self.smart_guess = None
 
     # Choose/determine the target
@@ -23,25 +26,22 @@ class Machine(Player):
         self.init_boards(self)
 
     # Validate guess position
-    def is_position_valid(self, position, direction=None):
+    def is_position_valid(self, position):
         board = self.guesses[self.target]
-        col = range(1, set["board"][1] + 1)
-        row = range(1, set["board"][0] + 1)
+        col = range(1, sets["board"][1] + 1)
+        row = range(1, sets["board"][0] + 1)
         if position[0] in col and position[1] in row:
             # Position in board
             if board[position[0] - 1][position[1] - 1] == "O":
                 return True
-            elif board[position[0] - 1][position[1] - 1] == "X":
-                # Remove direction
+            else:
                 return False
-        else:
-            # Position not in board
-            self.directions[direction] = False
 
     # Random guess
-    def random_guess(self):
-        return [randint(1, set["board"][1]),
-                randint(1, set["board"][0])]
+    @staticmethod
+    def random_guess():
+        return [randint(1, sets["board"][1]),
+                randint(1, sets["board"][0])]
 
     def still_floating(self, hit):
         board = self.guesses[self.target]
@@ -51,11 +51,11 @@ class Machine(Player):
             return True
 
     # Player guess
-    def player_guess(self, hitted=False):
+    def player_guess(self, hits=False):
         # Smart Guessing ship still floating
         if self.smart_guess and self.still_floating(self.smart_guess.hits[0]):
-            # Smart Guessing guess hitted
-            if hitted and self.hits[-1]["target"] == self.smart_guess.target:
+            # Smart Guessing guess hits
+            if hits and self.hits[-1]["target"] == self.smart_guess.target:
                 self.smart_guess.hits.append(self.hits.pop()["position"])
             guess = self.smart_guess.shoot()
         # No Smart Guessing
@@ -63,7 +63,7 @@ class Machine(Player):
             while len(self.hits) > 0:
                 hit = self.hits.pop()
                 if self.still_floating(hit["position"]):
-                    self.smart_guess = Smart_Guessing(self, hit)
+                    self.smart_guess = SmartGuessing(self, hit)
                     guess = self.smart_guess.shoot()
                     break
             else:
@@ -83,5 +83,5 @@ class Machine(Player):
 
     # Display guessing info of the AI
     def cheat(self, guess):
-        print("%sAI Target: %s" % (set["space"], self.target.name))
-        print("%sAI Guess: %s\n" % (set["space"], guess))
+        print("%sAI Target: %s" % (sets["space"], self.target.name))
+        print("%sAI Guess: %s\n" % (sets["space"], guess))

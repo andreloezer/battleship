@@ -1,9 +1,11 @@
+
+
 from random import randint
-from settings import settings as set
+from settings import settings as sets
 
 
 # Guessing around a hit
-class Smart_Guessing(object):
+class SmartGuessing(object):
     def __init__(self, player, start):
         self.player = player
         self.target = start["target"]
@@ -39,14 +41,13 @@ class Smart_Guessing(object):
     def random_shot(self):
         guess = self.try_shot.pop(randint(0,
                                           len(self.try_shot) - 1))
-        self.direction = guess[1]
         return guess[0]
 
     # Validate possible guess
     def is_guess_valid(self, guess, direction):
         board = self.player.guesses[self.player.target]
-        col = range(1, set["board"][1] + 1)
-        row = range(1, set["board"][0] + 1)
+        col = range(1, sets["board"][1] + 1)
+        row = range(1, sets["board"][0] + 1)
         if guess[0] in col and guess[1] in row:
             # Guess in board
             if board[guess[0] - 1][guess[1] - 1] == "O":

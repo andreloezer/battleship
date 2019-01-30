@@ -1,3 +1,5 @@
+
+
 from copy import deepcopy
 from math import floor
 
@@ -33,12 +35,12 @@ captains = ["Captain Jack Sparrow",
 
 
 # Ship types
-types = [{"type": "Dreadnought", "size": 6, "quantity": 0},
-         {"type": "Destroyer", "size": 5, "quantity": 0},
-         {"type": "Frigate", "size": 4, "quantity": 2},
-         {"type": "Corvette", "size": 3, "quantity": 2},
-         {"type": "PT Boat", "size": 2, "quantity": 2},
-         {"type": "Decoy", "size": 1, "quantity": 2}]
+types = [{"ship_type": "Dreadnought", "size": 6, "quantity": 0},
+         {"ship_type": "Destroyer", "size": 5, "quantity": 0},
+         {"ship_type": "Frigate", "size": 4, "quantity": 2},
+         {"ship_type": "Corvette", "size": 3, "quantity": 2},
+         {"ship_type": "PT Boat", "size": 2, "quantity": 2},
+         {"ship_type": "Decoy", "size": 1, "quantity": 0}]
 
 
 # Default settings
@@ -48,6 +50,7 @@ default = {
     "players": 5,  # Number of players
     "randomize": True,  # Randomize players ships
     "ai": 5,  # Number of AI players
+    "ships": 0,  # Number of valid ships
     "timeout": 0.01,  # Timeout between moves
     "smart": True,  # AI smart guessing after a hit
     "decoy": True,  # Decoy doesn't count as a ship
@@ -58,9 +61,8 @@ default = {
 
 
 # Determine the number of valid ships
-default["ships"] = 0
 for ship_type in types:
-    if ship_type["type"] != "Decoy" or not default["decoy"]:
+    if ship_type["ship_type"] != "Decoy" or not default["decoy"]:
         default["ships"] += ship_type["quantity"]
 
 

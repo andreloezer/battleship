@@ -1,6 +1,6 @@
 
 
-from settings import settings as set
+from settings import settings as sets
 import menu
 
 
@@ -15,10 +15,10 @@ class Salvo(object):
 
     # Get/ask the guesses for the salvo
     def get_shots(self):
-        for position in range(set["shots"]):
+        for position in range(sets["shots"]):
             while True:
                 if not self.player.ai:
-                    print("\n%sGuess shot %i" % (set["space"], position + 1))
+                    print("\n%sGuess shot %i" % (sets["space"], position + 1))
                 answer = self.player.get_guess()
                 if answer:
                     if answer not in self.positions:
@@ -26,7 +26,7 @@ class Salvo(object):
                         break
                     elif not self.player.ai:
                         print("\n%sYou can't guess the same spot"
-                              % set["space"])
+                              % sets["space"])
                 else:
                     self.positions = []
                     self.player.get_target()
@@ -39,10 +39,10 @@ class Salvo(object):
         index = 1
         while len(self.positions) > 0:
             guess = self.positions.pop(0)
-            print("\n%sShot %i" % (set["space"], index))
+            print("\n%sShot %i" % (sets["space"], index))
             index += 1
-            if set["cheat"]:
-                print("%s%s Shot: %s" % (set["space"], self.player.name,
+            if sets["cheat"]:
+                print("%s%s Shot: %s" % (sets["space"], self.player.name,
                                          guess))
             result = menu.game.check(self.player, guess)
             # Register score

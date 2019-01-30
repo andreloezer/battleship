@@ -1,7 +1,8 @@
 
+
 from random import randint
 from colorama import Fore
-from settings import settings as set
+from settings import settings as sets
 from functions import input_num
 
 
@@ -40,12 +41,11 @@ class Ship(object):
     # Place the ship at a random and valid place
     def gen_ship(self, hor, ver):
         positions = []
-        if self.direction is None:
-            position = [hor, ver]
         for point in range(self.size):
             if self.direction == "horizontal":
                 position = [hor, ver + point + 1]
-            elif self.direction == "vertical":
+            # When self.direction == "vertical"
+            else:
                 position = [hor + point + 1, ver]
             if self.validate(position):
                 positions.append({"floating": True, "coord": position})
@@ -61,14 +61,14 @@ class Ship(object):
                 if self.direction in (None, "random"):
                     self.direction = self.gen_direction()
                 if self.direction == "horizontal":
-                    hor = randint(1, set["board"][1])
-                    ver = randint(1, set["board"][0] - self.size - 1)
+                    hor = randint(1, sets["board"][1])
+                    ver = randint(1, sets["board"][0] - self.size - 1)
                 elif self.direction == "vertical":
-                    hor = randint(1, set["board"][1] - self.size - 1)
-                    ver = randint(1, set["board"][0])
+                    hor = randint(1, sets["board"][1] - self.size - 1)
+                    ver = randint(1, sets["board"][0])
                 else:
-                    hor = randint(1, set["board"][1])
-                    ver = randint(1, set["board"][0])
+                    hor = randint(1, sets["board"][1])
+                    ver = randint(1, sets["board"][0])
                 ship = self.gen_ship(hor, ver)
             else:
                 if self.size == 1:
@@ -86,15 +86,16 @@ class Ship(object):
             return False
 
     # Create position
-    def random_position(self):
-        row = randint(1, set["board"][1])
-        col = randint(1, set["board"][0])
+    @staticmethod
+    def random_position():
+        row = randint(1, sets["board"][1])
+        col = randint(1, sets["board"][0])
         return [row, col]
 
     # Ask human player for a direction for the ship
     def ask_direction(self):
         while True:
-            direction = input("%sChoose the direction" % (set["space"])
+            direction = input("%sChoose the direction" % (sets["space"])
                               + "(horizontal, vertical, random): "
                               ).lower()
             if direction in ("h", "horizontal"):
@@ -105,36 +106,37 @@ class Ship(object):
                 self.direction = "random"
                 return self.gen_direction()
             else:
-                print("%sEnter a valid direction" % (set["space"]))
+                print("%sEnter a valid direction" % (sets["space"]))
 
     # Ask human player for the starting position of the ship
     def ask_position_length(self):
-        print("\n%s%s (lenght: %d)" % (set["space"], self.name, self.size))
+        print("\n%s%s (lenght: %d)" % (sets["space"], self.name, self.size))
         self.direction = self.ask_direction()
         print("%s%s direction: %s"
-              % (set["space"] * 2, self.name, self.direction))
+              % (sets["space"] * 2, self.name, self.direction))
         if self.direction == "horizontal":
-            hor = input_num("%sChoose row" % (set["space"] * 2),
-                            1, set["board"][1], "int")
-            ver = input_num("%sChoose starting column" % (set["space"] * 2),
-                            1, set["board"][0] - self.size, "int") - 1
-        elif self.direction == "vertical":
-            ver = input_num("%sChoose col" % (set["space"] * 2),
-                            1, set["board"][0] - self.size, "int")
-            hor = input_num("%sChoose starting row" % (set["space"] * 2),
-                            1, set["board"][1], "int") - 1
+            hor = input_num("%sChoose row" % (sets["space"] * 2),
+                            1, sets["board"][1], "int")
+            ver = input_num("%sChoose starting column" % (sets["space"] * 2),
+                            1, sets["board"][0] - self.size, "int") - 1
+        # When self.direction == "vertical"
+        else:
+            ver = input_num("%sChoose col" % (sets["space"] * 2),
+                            1, sets["board"][0] - self.size, "int")
+            hor = input_num("%sChoose starting row" % (sets["space"] * 2),
+                            1, sets["board"][1], "int") - 1
         ship = self.gen_ship(hor, ver)
         return ship
 
     # Player chooses the ship position
     def ask_position(self):
-        print("\n%s%s:" % (set["space"], self.name))
+        print("\n%s%s:" % (sets["space"], self.name))
         row = input_num("%sChoose %s row"
-                        % (set["space"], self.name),
-                        1, set["board"][1], "int")
+                        % (sets["space"], self.name),
+                        1, sets["board"][1], "int")
         col = input_num("%sChoose %s column"
-                        % (set["space"], self.name),
-                        1, set["board"][0], "int")
+                        % (sets["space"], self.name),
+                        1, sets["board"][0], "int")
         position = [row, col]
         if self.validate(position):
             return [[True, position]]
@@ -148,17 +150,17 @@ class Ship(object):
         for ship in self.player.ships:
             for ship_position in ship.positions:
                 if ship_position["coord"] == [row, col]:
-                    if not (set["randomize"] or self.player.ai):
+                    if not (sets["randomize"] or self.player.ai):
                         print("\n%sPosition already occupied"
-                              % (set["space"] * 3))
+                              % (sets["space"] * 3))
                     return False
                 elif ship_position["coord"] in [[row - 1, col],
                                                 [row + 1, col],
                                                 [row, col - 1],
                                                 [row, col + 1]]:
-                    if not (set["randomize"] or self.player.ai):
+                    if not (sets["randomize"] or self.player.ai):
                         print("\n%sToo close to another ship"
-                              % (set["space"] * 3))
+                              % (sets["space"] * 3))
                     return False
         else:
             return True
