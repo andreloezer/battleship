@@ -6,7 +6,7 @@ from math import floor
 
 # Settings values interval
 interval = {
-    "board": [lambda ships: int(floor(ships)) * 1.5, 25],
+    "board": [lambda ships: int(floor(ships)) * 1.15, 20],
     "players": [2, 8],
     "ai": [0, lambda ai: ai - 1],
     "timeout": [0, 5],

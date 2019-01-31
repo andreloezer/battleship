@@ -192,7 +192,7 @@ def options():
                                          inr[ship["ship_type"]][1], "int")
             if ship["ship_type"] != "Decoy":
                 sets["ships"] += ship["quantity"]
-        board = int(floor(sets["ships"] * 1.5))
+        board = int(floor(sets["ships"] * 1.15))
         sets["board"] = [board, board]
         print("\nThe board size has been adjusted to %s" % sets["board"])
         print()

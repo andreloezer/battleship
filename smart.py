@@ -6,9 +6,9 @@ from settings import settings as sets
 
 # Guessing around a hit
 class SmartGuessing(object):
-    def __init__(self, player, start):
+    def __init__(self, player, target, start):
         self.player = player
-        self.target = start["target"]
+        self.target = target
         self.hits = [start["position"]]
         self.try_shot = []
         self.directions = {
@@ -45,7 +45,7 @@ class SmartGuessing(object):
 
     # Validate possible guess
     def is_guess_valid(self, guess, direction):
-        board = self.player.guesses[self.player.target]
+        board = self.player.guesses[self.target]
         col = range(1, sets["board"][1] + 1)
         row = range(1, sets["board"][0] + 1)
         if guess[0] in col and guess[1] in row:

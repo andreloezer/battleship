@@ -25,9 +25,10 @@ class Human(Player):
         self.init_ships()
 
     # Print own ships
-    def print_ships(self):
+    @staticmethod
+    def print_ships(target):
         print("%sEnemy Ships:" % (sets["space"]))
-        ships = self.target.ships
+        ships = target.ships
         for ship in ships:
             if ship.floating:
                 color = Fore.GREEN
@@ -43,18 +44,17 @@ class Human(Player):
         self.name = input("\n%sChoose a name: " % (sets["space"]))
         if not self.name:
             self.name = self.give_name()
-            print("%sRandom name choosen: %s\n"
+            print("%sRandom name chosen: %s\n"
                   % (sets["space"] * 2, self.name))
 
     # Print user readable board
-    def print_board(self, target=False):
-        if target:
+    def print_board(self, target):
+        if self is target:
             print("Your board:\n")
         else:
             print("\nTargets board:\n")
-            target = self.target
             if sets["cheat"]:
-                self.print_ships()
+                self.print_ships(target)
         header = "%s     " % (sets["space"])
         for col in range(sets["board"][0]):
             if col >= 9:
@@ -97,8 +97,8 @@ class Human(Player):
         if len(targets) == 1:
             self.target = targets[0]["player"]
         else:
-            self.ask_target()
-        self.init_boards(self)
+            self.target = self.ask_target()
+        self.init_boards(self, self.target)
 
     # Ask player to give a target
     def ask_target(self):
@@ -126,8 +126,7 @@ class Human(Player):
             elif not menu.game.players[target].is_alive:
                 print("%sCannot target a dead player" % (sets["space"] * 2))
             else:
-                self.target = menu.game.players[target]
-                break
+                return menu.game.players[target]
 
     # Ask guess
     @staticmethod

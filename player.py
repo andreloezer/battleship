@@ -3,9 +3,6 @@
 from random import randint
 
 
-from colorama import Fore, Style
-
-
 from settings import settings as sets, types
 import menu
 from ship import Ship
@@ -28,20 +25,6 @@ class Player(object):
         self.score = Score(self)
         self.init_boards(self, self)
 
-    # Print own ships
-    def print_ships(self):
-        print("%sEnemy Ships:" % (sets["space"]))
-        ships = self.target.ships
-        for ship in ships:
-            if ship.floating:
-                color = Fore.GREEN
-            else:
-                color = Fore.RED
-            name = color + ship.name + Style.RESET_ALL
-            print("%s%s: %s%s" % (sets["space"] * 2, name,
-                                  " " * (12 - len(ship.name)), ship))
-        print()
-
     # Initializes ships class
     def init_ships(self):
         for ship_type in types:
@@ -57,9 +40,8 @@ class Player(object):
         return name
 
     # Initializes Guesses boards if don't exist
-    def init_boards(self, player, target=None):
-        if not target:
-            target = self.target
+    @staticmethod
+    def init_boards(player, target):
         try:
             player.guesses[target]
         except KeyError:

@@ -10,11 +10,11 @@ class Salvo(object):
         self.positions = []
         self.hits = []
         self.sink = False
-        if self.player.ai or not self.player.target.is_alive:
-            self.player.get_target()
 
     # Get/ask the guesses for the salvo
     def get_shots(self):
+        if self.player.ai or not self.player.target.is_alive:
+            self.player.get_target()
         for position in range(sets["shots"]):
             while True:
                 if not self.player.ai:
@@ -44,10 +44,10 @@ class Salvo(object):
             if sets["cheat"]:
                 print("%s%s Shot: %s" % (sets["space"], self.player.name,
                                          guess))
-            result = menu.game.check(self.player, guess)
+            result = menu.game.check(self.player, self.player.target, guess)
             # Register score
             self.player.score.add(result)
-            menu.game.print_result(self.player, result)
+            menu.game.print_result(self.player, self.player.target, result)
             if result == "hits":
                 self.hits.append(guess)
             if result == "sinks":
