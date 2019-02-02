@@ -1,10 +1,43 @@
 
 
+"""
+
+    File:       menu.py
+    Project:    Console Battleship
+    Author:     André César Loezer
+    Email:      andrecesarloezer@gmail.com
+    Date:       2018/2019
+
+    A python 3.6 Battleship game with no UI, just console
+
+    Written on Atom and PyCharm, following PEP8 standards
+
+    Inspired on Codecademy's Python 2 'List and Function - Battleship!'
+    www.codecademy.com/courses/learn-python/lessons/battleship/
+
+    This project was done with the sole purpose of learning
+
+    Dependencies
+        Colorama (pypi.org/project/colorama)
+
+    Features
+         8 players (humans or not),
+         Salvo (variable number of shots),
+         Smart guessing for machine players,
+         Variable board sizes for each coordinate,
+         Multiples ships with different sizes,
+         Decoys (does not count to the number of ships),
+         Score tracking,
+         Options to change settings about all this features
+
+"""
+
+
 from sys import exit
 from math import floor
 from colorama import Fore, Back, Style
 from settings import settings, default as dv, interval as inr, types
-from functions import input_num, offset
+from functions import input_num, offset, clear_screen
 from game import NewGame
 
 
@@ -16,6 +49,7 @@ game = None
 
 # Main menu
 def menu():
+    clear_screen()
     print("\n\n%s" % ((offset() + 5) * '=' * 2))
     print("%s %sBattleship%s %s" % ((offset() - 1) * '=',
                                     Back.BLUE,
@@ -62,6 +96,7 @@ def menu():
 
 # Starting screen with some options
 def options():
+    clear_screen()
     global sets
     # Colors for boolean settings
     colors = {}
@@ -83,10 +118,10 @@ def options():
                     decoys = " and a decoy"
                 elif ship_type["quantity"] > 1:
                     decoys = " and %d decoys" % ship_type["quantity"]
-    print("%s %sOptions%s %s" % (offset() * '=',
-                                 Back.BLUE,
-                                 Style.RESET_ALL,
-                                 (offset() + 1) * '='))
+    print("\n\n\n%s %sOptions%s %s" % (offset() * '=',
+                                       Back.BLUE,
+                                       Style.RESET_ALL,
+                                       (offset() + 1) * '='))
 
     print("\nThere are %d ships%s:" % (sets["ships"], decoys))
     for ship_type in types:
