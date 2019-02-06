@@ -57,7 +57,6 @@ class Human(Player):
                       % (sets["space"], self.name))
             else:
                 self.choose_ship = False
-        self.init_ships()
 
     # Print own ships
     @staticmethod
@@ -97,34 +96,36 @@ class Human(Player):
             else:
                 space = "   "
             header += str(col + 1) + space
-        print(header)
         sub_header = "%s     |%s" % (sets["space"],
                                      "   |" * (sets["board"][0] - 1))
-        print(sub_header)
-        print()
-        i = 1
+        print(header + "\n" + sub_header + "\n")
+        col_count = 1
         for row in self.guesses[target]:
-            if i >= 10:
-                print_row = "%s%d-  " % (sets["space"], i)
+            if col_count >= 10:
+                print_row = "%s%d-  " % (sets["space"], col_count)
             else:
-                print_row = "%s %d-  " % (sets["space"], i)
-            for item in row:
-                if item == "X":
-                    color = Fore.RED
-                elif item == "H":
-                    color = Fore.GREEN
-                elif item == "S":
-                    color = Fore.CYAN
+                print_row = "%s %d-  " % (sets["space"], col_count)
+            for position in row:
+                # Miss
+                if position == "X":
+                    color = Fore.RED + position
+                # Hit
+                elif position == "H":
+                    color = Fore.GREEN + position
+                # Sunk
+                elif position == "S":
+                    color = Fore.CYAN + position
+                # Floating
+                elif position == "F" and (sets["cheat"] or self is target):
+                    color = Fore.WHITE + position
+                # Water
                 else:
-                    color = Fore.BLUE
-                print_row += color + item + Style.RESET_ALL + "   "
-            print_row += "-%d" % i
-            print(print_row)
-            print()
-            i += 1
-        print(sub_header)
-        print(header)
-        print()
+                    color = Fore.BLUE + "O"
+                print_row += color + Style.RESET_ALL + "   "
+            print_row += "-%d" % col_count
+            print(print_row, "\n")
+            col_count += 1
+        print(sub_header + "\n" + header + "\n")
 
     # Choose/determine the target
     def get_target(self):

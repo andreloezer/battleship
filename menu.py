@@ -35,7 +35,12 @@
 
 from sys import exit
 from math import floor
+from time import sleep
+
+
 from colorama import Fore, Back, Style
+
+
 from settings import settings, default as dv, interval as inr, types
 from functions import input_num, offset, clear_screen
 from game import NewGame
@@ -118,10 +123,10 @@ def options():
                     decoys = " and a decoy"
                 elif ship_type["quantity"] > 1:
                     decoys = " and %d decoys" % ship_type["quantity"]
-    print("\n\n\n%s %sOptions%s %s" % (offset() * '=',
-                                       Back.BLUE,
-                                       Style.RESET_ALL,
-                                       (offset() + 1) * '='))
+    print("\n\n%s %sOptions%s %s" % (offset() * '=',
+                                     Back.BLUE,
+                                     Style.RESET_ALL,
+                                     (offset() + 1) * '='))
 
     print("\nThere are %d ships%s:" % (sets["ships"], decoys))
     for ship_type in types:
@@ -130,7 +135,7 @@ def options():
         else:
             plural = ""
         if ship_type["quantity"] > 0:
-            print("%s%s %s%s with size of %s" % (sets["space"],
+            print("%s%s %s%s with size of %d" % (sets["space"],
                                                  ship_type["quantity"],
                                                  ship_type["ship_type"],
                                                  plural,
@@ -141,7 +146,7 @@ def options():
     print("Number of Players (p)   Current: %d" % (sets["players"]))
     print("AI Players (a)          Current: %d" % (sets["ai"]))
     print("Salvo shots (ss)        Current: %d" % (sets["shots"]))
-    print("AI Pause Time (t)       Current: %ss" % (sets["timeout"]))
+    print("AI Pause Time (t)       Current: %4.2fs" % (sets["timeout"]))
     print("AI Smart Guessing (sg)  Current: %s%s%s"
           % (colors["smart"], sets["smart"], Style.RESET_ALL))
     print("Ignore Decoys (ig)      Current: %s%s%s"
@@ -183,8 +188,6 @@ def options():
                                      inr["board"][0](sets["ships"]),
                                      inr["board"][1],
                                      "int")
-        options()
-        return
     elif answer in ("p",
                     "players",
                     "number of players",
@@ -197,15 +200,10 @@ def options():
         if sets["ai"] > sets["players"] - 1:
             sets["ai"] = sets["players"] - 1
             print("AI players reduced to %d." % (sets["ai"]))
-        options()
-        return
     elif answer in ("c",
                     "cheat"):
         sets["cheat"] = not sets["cheat"]
         print("Cheat: %s" % (sets["cheat"]))
-        print()
-        options()
-        return
     elif answer in ("sg",
                     "smart",
                     "ai smart",
@@ -213,15 +211,12 @@ def options():
                     "ai smart guessing"):
         sets["smart"] = not sets["smart"]
         print("Smart Guessing: %s" % (sets["smart"]))
-        print()
-        options()
-        return
     elif answer in ("s",
                     "cs",
                     "ships",
                     "choose ships"):
         for ship in types:
-            ship["quantity"] = input_num("Choose the quantity of %s(Size: %s)"
+            ship["quantity"] = input_num("Choose the quantity of %s(Size: %d)"
                                          % (ship["ship_type"], ship["size"]),
                                          inr[ship["ship_type"]][0],
                                          inr[ship["ship_type"]][1], "int")
@@ -229,18 +224,14 @@ def options():
                 sets["ships"] += ship["quantity"]
         board = int(floor(sets["ships"] * 1.15))
         sets["board"] = [board, board]
-        print("\nThe board size has been adjusted to %s" % sets["board"])
-        print()
-        options()
+        print("\nThe board size has been adjusted to (%d, %d)" %
+              (sets["board"][0], sets["board"][1]))
     elif answer in ("ig",
                     "decoy",
                     "ignore",
                     "ignore decoy"):
         sets["decoy"] = not sets["decoy"]
         print("Ignore Decoys: %s" % (sets["decoy"]))
-        print()
-        options()
-        return
     elif answer in ("e",
                     "exit",
                     "q",
@@ -254,9 +245,6 @@ def options():
                     "restore_default",
                     "restoredefault"):
         sets = dv.copy()
-
-        options()
-        return
     elif answer in ("r",
                     "randomize",
                     "randomize ships",
@@ -264,16 +252,10 @@ def options():
                     "randomizeships"):
         sets["randomize"] = not sets["randomize"]
         print("Randomize Ships: %s" % (sets["randomize"]))
-        print()
-        options()
-        return
     elif answer in ("sc",
                     "scores"):
         sets["scores"] = not sets["scores"]
         print("Players Scores: %s" % (sets["scores"]))
-        print()
-        options()
-        return
     elif answer in ("a",
                     "ai",
                     "ai players",
@@ -283,8 +265,6 @@ def options():
                                inr["ai"][0],
                                inr["ai"][1](sets["players"]),
                                "int")
-        options()
-        return
     elif answer in ("ss",
                     "salvo",
                     "shots",
@@ -294,8 +274,6 @@ def options():
                                   inr["shots"][0],
                                   inr["shots"][1],
                                   "int")
-        options()
-        return
     elif answer in ("t",
                     "pause",
                     "time",
@@ -307,13 +285,12 @@ def options():
                                     inr["timeout"][0],
                                     inr["timeout"][1],
                                     "float")
-        options()
-        return
     elif answer in ("m",
                     "menu",
                     "return"):
         menu()
     else:
         print("Enter a valid answer!")
-        options()
-        return
+    sleep(sets["timeout"] * 2)
+    options()
+    return

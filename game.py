@@ -80,6 +80,7 @@ class NewGame(object):
             player = self.players.pop(randint(0, len(self.players) - 1))
             player.index = index
             random_list.append(player)
+            player.init_ships()
             index += 1
         self.players = random_list
         # Loop through turns
@@ -231,6 +232,7 @@ class NewGame(object):
     # Print the result of the guess
     @staticmethod
     def print_result(player, target, result):
+        # TODO: Consider using a GUI library (Very optional)
         if result in ("eliminates", "win"):
             print("%s%s%s%s sunken the last ship of %s%s%s!" %
                   (sets["space"], Style.BRIGHT, player.name, Style.RESET_ALL,
@@ -243,12 +245,12 @@ class NewGame(object):
                       % (sets["space"], Style.BRIGHT, player.name,
                          Style.RESET_ALL, Fore.GREEN, Style.RESET_ALL))
             elif sets["shots"] > 1:
-                print("%s%s%s%s was awarded with a Salvo of %i shots.\n"
+                print("%s%s%s%s was awarded with a Salvo of %d shots.\n"
                       % (sets["space"], Style.BRIGHT, player.name,
                          Style.RESET_ALL, sets["shots"]))
         else:
             if result == "hits":
-                print("%s%s%s%s %shitted%s something in %s%s%s board.\n"
+                print("%s%s%s%s %shits%s something in %s%s%s board.\n"
                       % (sets["space"], Style.BRIGHT, player.name,
                          Style.RESET_ALL, Fore.GREEN, Style.RESET_ALL,
                          Style.BRIGHT, target.name, Style.RESET_ALL))
@@ -273,7 +275,7 @@ class NewGame(object):
                          Style.RESET_ALL, sets["ships"]
                          - target.ships_sunken))
                 if sets["shots"] > 1:
-                    print("%s%s%s%s was awarded with a Salvo of %i shots.\n"
+                    print("%s%s%s%s was awarded with a Salvo of %d shots.\n"
                           % (sets["space"], Style.BRIGHT, player.name,
                              Style.RESET_ALL, sets["shots"]))
                 player.ship = None

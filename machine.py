@@ -47,7 +47,6 @@ class Machine(Player):
         self.ai = True
         self.choose_ship = False
         self.name = self.give_name()
-        self.init_ships()
         self.smart = sets["smart"]
         self.smart_guess = None
 

@@ -61,9 +61,13 @@ class Player(object):
     # Initializes ships class
     def init_ships(self):
         for ship_type in types:
-            for ship in range(ship_type["quantity"]):
-                self.ships.append(Ship(self, ship_type["ship_type"],
-                                       ship_type["size"]))
+            for ship_num in range(ship_type["quantity"]):
+                ship = Ship(self, ship_type["ship_type"], ship_type["size"])
+                self.ships.append(ship)
+                for position in ship.positions:
+                    hor = position["coord"][0] - 1
+                    ver = position["coord"][1] - 1
+                    self.guesses[self][hor][ver] = "F"
 
     # Randomize a name
     @staticmethod
@@ -75,6 +79,9 @@ class Player(object):
     # Initializes Guesses boards if don't exist
     @staticmethod
     def init_boards(player, target):
+        # TODO: Make board a class
+        #       Add info about ship (pointer to instance) on each position
+        #       Add land ("L for land), and land generator
         try:
             player.guesses[target]
         except KeyError:
@@ -82,6 +89,12 @@ class Player(object):
             for row in range(sets["board"][1]):
                 player.guesses[target].append(["O"]
                                               * sets["board"][0])
+            if target is not player:
+                for ship in target.ships:
+                    for position in ship.positions:
+                        hor = position["coord"][0] - 1
+                        ver = position["coord"][1] - 1
+                        player.guesses[target][hor][ver] = "F"
 
     # List valid targets
     def list_targets(self):
