@@ -33,6 +33,7 @@
 """
 
 
+# Project modules
 from random import randint
 from colorama import Fore
 from settings import settings as sets
@@ -53,22 +54,19 @@ class Ship(object):
 
     # Generate a random direction for the ship
     def gen_direction(self):
-        if self.size == 1:
-            return None
+        if self.direction == "random":
+            return ["horizontal", "vertical"][randint(0, 1)]
         else:
-            if self.direction == "random":
-                return ["horizontal", "vertical"][randint(0, 1)]
-            else:
-                return self.direction
+            return self.direction
 
     # Prepare a string for printing the Ship class (used on cheat)
     def __str__(self):
         string = ""
         for position in self.positions:
             if position["floating"]:
-                string += Fore.GREEN + str(position["coord"])
+                string += Fore.GREEN + str(position["coord"] + 1)
             else:
-                string += Fore.RED + str(position["coord"])
+                string += Fore.RED + str(position["coord"] + 1)
         return string
 
     # Place the ship at a random and valid place
@@ -78,8 +76,10 @@ class Ship(object):
             if self.direction == "horizontal":
                 position = [hor, ver + point + 1]
             # When self.direction == "vertical"
-            else:
+            elif self.direction == "vertical":
                 position = [hor + point + 1, ver]
+            else:
+                position = [hor, ver]
             if self.validate(position):
                 positions.append({"floating": True, "coord": position})
             else:
@@ -91,17 +91,16 @@ class Ship(object):
     def create_ship(self):
         while True:
             if not self.player.choose_ship or self.player.ai:
-                if self.direction in (None, "random"):
+                if self.size != 1:
                     self.direction = self.gen_direction()
+                # Starting position + size must fit inside board
+                start = [0, 0]
                 if self.direction == "horizontal":
-                    hor = randint(1, sets["board"][1])
-                    ver = randint(1, sets["board"][0] - self.size - 1)
+                    start[0] = self.size + 1
                 elif self.direction == "vertical":
-                    hor = randint(1, sets["board"][1] - self.size - 1)
-                    ver = randint(1, sets["board"][0])
-                else:
-                    hor = randint(1, sets["board"][1])
-                    ver = randint(1, sets["board"][0])
+                    start[1] = self.size + 1
+                hor = randint(0, sets["board"][1] - (start[1] + 1))
+                ver = randint(0, sets["board"][0] - (start[0] + 1))
                 ship = self.gen_ship(hor, ver)
             else:
                 if self.size == 1:
@@ -121,8 +120,8 @@ class Ship(object):
     # Create position
     @staticmethod
     def random_position():
-        row = randint(1, sets["board"][1])
-        col = randint(1, sets["board"][0])
+        row = randint(0, sets["board"][1] - 1)
+        col = randint(0, sets["board"][0] - 1)
         return [row, col]
 
     # Ask human player for a direction for the ship
@@ -143,7 +142,7 @@ class Ship(object):
 
     # Ask human player for the starting position of the ship
     def ask_position_length(self):
-        print("\n%s%s (lenght: %d)" % (sets["space"], self.name, self.size))
+        print("\n%s%s (length: %d)" % (sets["space"], self.name, self.size))
         self.direction = self.ask_direction()
         print("%s%s direction: %s"
               % (sets["space"] * 2, self.name, self.direction))

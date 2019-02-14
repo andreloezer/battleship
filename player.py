@@ -33,13 +33,20 @@
 """
 
 
+# Python module
 from random import randint
 
 
-from settings import settings as sets, types
+# Third-party module
+from colorama import Fore, Style
+
+
+# Project modules
+from settings import types, settings as sets
 import menu
 from ship import Ship
 from score import Score
+from board import Board
 
 
 # Player class
@@ -65,9 +72,9 @@ class Player(object):
                 ship = Ship(self, ship_type["ship_type"], ship_type["size"])
                 self.ships.append(ship)
                 for position in ship.positions:
-                    hor = position["coord"][0] - 1
-                    ver = position["coord"][1] - 1
-                    self.guesses[self][hor][ver] = "F"
+                    hor = position["coord"][0]
+                    ver = position["coord"][1]
+                    self.guesses[self].board[hor][ver] = "F"
 
     # Randomize a name
     @staticmethod
@@ -79,22 +86,12 @@ class Player(object):
     # Initializes Guesses boards if don't exist
     @staticmethod
     def init_boards(player, target):
-        # TODO: Make board a class
-        #       Add info about ship (pointer to instance) on each position
+        # TODO: Add info about ship (pointer to instance) on each position
         #       Add land ("L for land), and land generator
         try:
             player.guesses[target]
         except KeyError:
-            player.guesses[target] = []
-            for row in range(sets["board"][1]):
-                player.guesses[target].append(["O"]
-                                              * sets["board"][0])
-            if target is not player:
-                for ship in target.ships:
-                    for position in ship.positions:
-                        hor = position["coord"][0] - 1
-                        ver = position["coord"][1] - 1
-                        player.guesses[target][hor][ver] = "F"
+            player.guesses[target] = Board(player, target)
 
     # List valid targets
     def list_targets(self):
@@ -105,3 +102,18 @@ class Player(object):
                     targets.append({"player": player,
                                     "ship_type": player.name})
         return targets
+
+    # Print own ships
+    @staticmethod
+    def print_ships(target):
+        print("%sEnemy Ships:" % (sets["space"]))
+        ships = target.ships
+        for ship in ships:
+            if ship.floating:
+                color = Fore.GREEN
+            else:
+                color = Fore.RED
+            name = color + ship.name + Style.RESET_ALL
+            print("%s%s: %s%s" % (sets["space"] * 2, name,
+                                  " " * (12 - len(ship.name)), ship))
+        print()

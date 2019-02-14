@@ -33,11 +33,13 @@
 """
 
 
+# Third-party module
 from colorama import Fore, Style
+
+
+# Project modules
 from settings import settings as sets
 from functions import input_num
-
-
 from player import Player
 import menu
 
@@ -80,52 +82,6 @@ class Human(Player):
             self.name = self.give_name()
             print("%sRandom name chosen: %s\n"
                   % (sets["space"] * 2, self.name))
-
-    # Print user readable board
-    def print_board(self, target):
-        if self is target:
-            print("Your board:\n")
-        else:
-            print("\nTargets board:\n")
-            if sets["cheat"]:
-                self.print_ships(target)
-        header = "%s     " % (sets["space"])
-        for col in range(sets["board"][0]):
-            if col >= 9:
-                space = "  "
-            else:
-                space = "   "
-            header += str(col + 1) + space
-        sub_header = "%s     |%s" % (sets["space"],
-                                     "   |" * (sets["board"][0] - 1))
-        print(header + "\n" + sub_header + "\n")
-        col_count = 1
-        for row in self.guesses[target]:
-            if col_count >= 10:
-                print_row = "%s%d-  " % (sets["space"], col_count)
-            else:
-                print_row = "%s %d-  " % (sets["space"], col_count)
-            for position in row:
-                # Miss
-                if position == "X":
-                    color = Fore.RED + position
-                # Hit
-                elif position == "H":
-                    color = Fore.GREEN + position
-                # Sunk
-                elif position == "S":
-                    color = Fore.CYAN + position
-                # Floating
-                elif position == "F" and (sets["cheat"] or self is target):
-                    color = Fore.WHITE + position
-                # Water
-                else:
-                    color = Fore.BLUE + "O"
-                print_row += color + Style.RESET_ALL + "   "
-            print_row += "-%d" % col_count
-            print(print_row, "\n")
-            col_count += 1
-        print(sub_header + "\n" + header + "\n")
 
     # Choose/determine the target
     def get_target(self):
@@ -182,13 +138,18 @@ class Human(Player):
                                    sets["board"][(len(guessing) - 1) - count],
                                    "int")
             if answer:
-                guess.append(answer)
+                guess.append(answer - 1)
             else:
                 return False
         return guess
 
     # Ask player for a guess
     def player_guess(self, hits=False):
+        if sets["cheat"]:
+            print("\nTargets board:\n")
+            if sets["cheat"]:
+                self.print_ships(self.target)
+        print(self.guesses[self.target])
         if hits:
             print("%sYou were awarded with another shot!\n" % sets["space"])
         guess = self.get_guess()

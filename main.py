@@ -33,10 +33,15 @@
 """
 
 
-from colorama import init
+# Python module
 import os
 
 
+# Third-party module
+from colorama import init
+
+
+# Project module
 from menu import menu
 
 

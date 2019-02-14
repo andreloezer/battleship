@@ -33,6 +33,7 @@
 """
 
 
+# Python modules
 from copy import deepcopy
 from math import floor
 
@@ -70,19 +71,19 @@ captains = ["Captain Jack Sparrow",
 # Ship types
 types = [{"ship_type": "Dreadnought", "size": 6, "quantity": 0},
          {"ship_type": "Destroyer", "size": 5, "quantity": 0},
-         {"ship_type": "Frigate", "size": 4, "quantity": 2},
+         {"ship_type": "Frigate", "size": 4, "quantity": 1},
          {"ship_type": "Corvette", "size": 3, "quantity": 2},
-         {"ship_type": "PT Boat", "size": 2, "quantity": 2},
-         {"ship_type": "Decoy", "size": 1, "quantity": 0}]
+         {"ship_type": "PT Boat", "size": 2, "quantity": 1},
+         {"ship_type": "Decoy", "size": 1, "quantity": 2}]
 
 
 # Default settings
 default = {
     "board": [10, 10],  # Board Size [num of rows, num of cols]
     "cheat": True,  # Display other players ships and guesses
-    "players": 3,  # Number of players
+    "players": 4,  # Number of players
     "randomize": True,  # Randomize players ships
-    "ai": 2,  # Number of AI players
+    "ai": 4,  # Number of AI players
     "ships": 0,  # Number of valid ships
     "timeout": 0.01,  # Timeout between moves
     "smart": True,  # AI smart guessing after a hit

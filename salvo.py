@@ -33,6 +33,7 @@
 """
 
 
+# Project modules
 from settings import settings as sets
 import menu
 
@@ -63,7 +64,7 @@ class Salvo(object):
                 else:
                     self.positions = []
                     self.player.get_target()
-                    self.player.print_board()
+                    self.player.guesses[self.player.target].print_board()
                     self.get_shots()
                     return
 

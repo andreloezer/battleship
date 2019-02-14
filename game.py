@@ -1,4 +1,4 @@
-
+# coding=utf-8
 
 """
 
@@ -33,14 +33,17 @@
 """
 
 
+# Python modules
 from copy import deepcopy
 from random import randint
 from time import sleep
 
 
+# Third-party module
 from colorama import Fore, Style
 
 
+# Project modules
 from settings import settings as sets, captains
 from functions import offset, clear_screen
 from human import Human
@@ -103,13 +106,12 @@ class NewGame(object):
     # Control the flow of the player
     def move(self, player, status="guess"):
         if not player.ai and status == "guess":
-            player.print_board(player)
+            print("Your board:\n")
+            print(player.guesses[player])
         if status == "guess" or not player.target.is_alive:
             player.get_target()
         # Guess
         if status in ("guess", "hits") or sets["shots"] == 1:
-            if not player.ai:
-                player.print_board(player.target)
             if status == "guess":
                 guess = player.player_guess()
             # When status == "hits"
@@ -127,7 +129,11 @@ class NewGame(object):
         # When status is "sinks" or "eliminates" and sets["shots"] > 1
         else:
             if not player.ai:
-                player.print_board(player.target)
+                if sets["cheat"]:
+                    print("\nTargets board:\n")
+                    if sets["cheat"]:
+                        player.print_ships(player.target)
+                print(player.guesses[player.target])
             player.salvo = Salvo(player)
             player.salvo.get_shots()
             # Check salvo
@@ -154,24 +160,23 @@ class NewGame(object):
     # Register the wrong guess in the guesses board
     @staticmethod
     def missed(player, target, guess):
-        board = player.guesses[target]
-        board_player = target.guesses[target]
-        if board[guess[0] - 1][guess[1] - 1] == "X":
-            if not player.ai:
-                return "already guessed"
+        board = player.guesses[target].board
+        board_player = target.guesses[target].board
+        if board[guess[0]][guess[1]] == "X":
+            return "already guessed"
         else:
-            board[guess[0] - 1][guess[1] - 1] = "X"
-            board_player[guess[0] - 1][guess[1] - 1] = "X"
+            board[guess[0]][guess[1]] = "X"
+            board_player[guess[0]][guess[1]] = "X"
             return "misses"
 
     # Hit a ship
     @classmethod
     def hit(cls, player, target, ship, position, guess):
-        board = player.guesses[target]
-        board_player = target.guesses[target]
-        if board[guess[0] - 1][guess[1] - 1] == "O":
-            board[guess[0] - 1][guess[1] - 1] = "H"
-            board_player[guess[0] - 1][guess[1] - 1] = "H"
+        board = player.guesses[target].board
+        board_player = target.guesses[target].board
+        if board[guess[0]][guess[1]] == "F":
+            board[guess[0]][guess[1]] = "H"
+            board_player[guess[0]][guess[1]] = "H"
             if position["floating"]:
                 position["floating"] = False
                 ship.hits += 1
@@ -191,11 +196,11 @@ class NewGame(object):
     def sink_ship(cls, player, target, ship):
         ship.floating = False
         cls.register_ship(player, target, ship)
-        if player.ai and player.smart_guess:
-            player.smart_guess = None
-        target.ships_sunken += 1
-        if target.ships_sunken == sets["ships"]:
-            return cls.eliminate_player(player, target)
+        if player.ai and player.smart:
+            player.smart = None
+        player.target.ships_sunken += 1
+        if player.target.ships_sunken == sets["ships"]:
+            return cls.eliminate_player(player)
         else:
             player.ship = ship.name
             return "sinks"
@@ -205,14 +210,14 @@ class NewGame(object):
     def register_ship(player, target, ship):
         for enemy in menu.game.players:
             player.init_boards(enemy, target)
-            board = enemy.guesses[target]
+            board = enemy.guesses[target].board
             for position in ship.positions:
-                board[position["coord"][0] - 1][position["coord"][1] - 1] = "S"
+                board[position["coord"][0]][position["coord"][1]] = "S"
 
     # Eliminate current target player, checks for endgame
     @classmethod
-    def eliminate_player(cls, player, target):
-        target.is_alive = False
+    def eliminate_player(cls, player):
+        player.target.is_alive = False
         # All players but self is alive (Winner)
         if cls.is_endgame(player):
             return "win"
@@ -223,16 +228,15 @@ class NewGame(object):
     @staticmethod
     def is_endgame(player):
         for enemy in menu.game.players:
-            if enemy != player:
-                if enemy.is_alive:
-                    return False
+            if enemy != player and enemy.is_alive:
+                return False
         else:
             return True
 
     # Print the result of the guess
     @staticmethod
     def print_result(player, target, result):
-        # TODO: Consider using a GUI library (Very optional)
+        # TODO: Consider using a GUI library
         if result in ("eliminates", "win"):
             print("%s%s%s%s sunken the last ship of %s%s%s!" %
                   (sets["space"], Style.BRIGHT, player.name, Style.RESET_ALL,
@@ -283,8 +287,10 @@ class NewGame(object):
 
     @staticmethod
     def print_score(best_player):
+        # TODO: Transform this function into Game Statistics
+        # TODO: Print the number of rounds
         offset1 = 15
-        offset2 = 25
+        offset2 = 35
         print("%sBests Scores\n" % sets["space"])
         for key, value in best_player.items():
             if key == "accuracy":

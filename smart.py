@@ -33,7 +33,11 @@
 """
 
 
+# Python module
 from random import randint
+
+
+# Project module
 from settings import settings as sets
 
 
@@ -78,18 +82,19 @@ class SmartGuessing(object):
 
     # Validate possible guess
     def is_guess_valid(self, guess, direction):
-        board = self.player.guesses[self.target]
-        col = range(1, sets["board"][1] + 1)
-        row = range(1, sets["board"][0] + 1)
+        board = self.player.guesses[self.target].board
+        col = range(0, sets["board"][1])
+        row = range(0, sets["board"][0])
         if guess[0] in col and guess[1] in row:
             # Guess in board
-            if board[guess[0] - 1][guess[1] - 1] == "O":
+            if board[guess[0]][guess[1]] in ("O", "F"):
                 return True
-            elif board[guess[0] - 1][guess[1] - 1] == "X":
+            elif board[guess[0]][guess[1]] == "X":
+
                 # Remove direction
                 self.directions[direction] = False
                 return False
-            elif board[guess[0] - 1][guess[1] - 1] == "H":
+            elif board[guess[0]][guess[1]] == "H":
                 if guess not in self.hits:
                     self.hits.append(guess)
                 return False
