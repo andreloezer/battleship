@@ -77,7 +77,7 @@ class Salvo(object):
             index += 1
             if sets["cheat"]:
                 print("%s%s Shot: %s" % (sets["space"], self.player.name,
-                                         guess))
+                                         [guess[0] + 1, guess[1] + 1]))
             result = menu.game.check(self.player, self.player.target, guess)
             # Register score
             self.player.score.add(result)

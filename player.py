@@ -97,10 +97,9 @@ class Player(object):
     def list_targets(self):
         targets = []
         for player in menu.game.players:
-            if player.is_alive:
-                if player != self:
-                    targets.append({"player": player,
-                                    "ship_type": player.name})
+            if player.is_alive and player != self:
+                targets.append({"player": player,
+                                "ship_type": player.name})
         return targets
 
     # Print own ships
