@@ -57,17 +57,15 @@ interval = {
 # Names for AI players and nameless humans
 # TODO: Change name of captains to the top famous pirates
 #  https://sidmeierspirates.fandom.com/wiki/Famous_Pirate
-captains = ["Captain Jack Sparrow",
-            "Captain James T. Kirk",
-            "Captain Ahab",
-            "Admiral Ackbar",
-            "Captain Hendrick van der Decken",
-            "Admiral Motti",
-            "Captain Haddock",
-            "Captain Davy Jones",
-            "Captain Hook",
-            "Captain Han Solo",
-            "Admiral General Aladeen"]
+captains = ["Henry Morgan",
+            "Blackbeard",
+            "Captain Kidd",
+            "Jean Lafitte",
+            "Stede Bonnet",
+            "L'Olonnais",
+            "Roc Brasiliano",
+            "Bart Roberts",
+            "Jack Rackham"]
 
 
 # Ship types
