@@ -63,10 +63,12 @@ class Ship(object):
     def __str__(self):
         string = ""
         for position in self.positions:
+            coordinate = [position["coord"][0] + 1,
+                          position["coord"][1] + 1]
             if position["floating"]:
-                string += Fore.GREEN + str(position["coord"] + 1)
+                string += Fore.GREEN + str(coordinate)
             else:
-                string += Fore.RED + str(position["coord"] + 1)
+                string += Fore.RED + str(coordinate)
         return string
 
     # Place the ship at a random and valid place

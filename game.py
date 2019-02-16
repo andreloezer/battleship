@@ -1,4 +1,4 @@
-# coding=utf-8
+
 
 """
 
@@ -104,6 +104,7 @@ class NewGame(object):
                     self.move(player)
 
     # Control the flow of the player
+    # TODO: Simplify
     def move(self, player, status="guess"):
         if not player.ai and status == "guess":
             print("Your board:\n")

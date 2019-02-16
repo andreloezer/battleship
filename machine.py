@@ -44,6 +44,13 @@ from smart import SmartGuessing
 
 
 class Machine(Player):
+    sides = {
+        "up": [-1, 0],
+        "down": [1, 0],
+        "left": [0, -1],
+        "right": [0, 1]
+    }
+
     def __init__(self):
         Player.__init__(self)
         self.ai = True
@@ -59,16 +66,9 @@ class Machine(Player):
             self.target = targets[randint(0, len(targets) - 1)]["player"]
         self.init_boards(self, self.target)
 
-    # Validate guess position
-    def is_position_valid(self, target, position):
-        board = self.guesses[target].board
-        if board[position[0]][position[1]] in ("O", "F"):
-            return True
-        else:
-            return False
-
     # Player guess
     def player_guess(self, hits=False):
+        guess = False
         board = self.guesses[self.target].board
         # Smart Guessing ship still floating
         if self.smart and\
@@ -77,10 +77,6 @@ class Machine(Player):
             if hits and self.hits[-1]["target"] == self.smart.target:
                 self.smart.hits.append(self.hits.pop()["position"])
             guess = self.smart.shoot()
-            if not guess:
-                self.smart = None
-                self.get_target()
-                guess = self.get_guess()
         # No Smart Guessing
         else:
             while len(self.hits) > 0:
@@ -89,31 +85,27 @@ class Machine(Player):
 
                     self.smart = SmartGuessing(self, self.target, hit)
                     guess = self.smart.shoot()
-                    break
-            else:
-                self.smart = None
-                guess = self.get_guess()
+        if guess:
+            return guess
+        else:
+            self.smart = None
+            self.get_target()
+            guess = self.get_guess()
         return guess
 
-    @staticmethod
-    def get_sides(guess):
-        # TODO: Unify guess validation of Machine and SmartGuessing
-        sides = {
-            "up": [-1, 0],
-            "down": [1, 0],
-            "left": [0, -1],
-            "right": [0, 1]
-        }
+    def get_sides(self, guess):
+        sides = {}
         col = range(0, sets["board"][1])
         row = range(0, sets["board"][0])
-        for key in sides.keys():
-            value = [sides[key][0] + guess[0], sides[key][1] + guess[1]]
-            if value[0] in col and value[1] in row:
-                sides[key] = value
+        for key, value in self.sides.items():
+            position = [value[0] + guess[0], value[1] + guess[1]]
+            if position[0] in col and position[1] in row:
+                sides[key] = position
         return sides
 
     # Random guess
     def get_guess(self):
+        board = self.guesses[self.target].board
         valid_positions = []
         for row_index, row in enumerate(self.guesses[self.target].board):
             for col_index, col in enumerate(row):
@@ -124,7 +116,7 @@ class Machine(Player):
             if sets["decoy"]:
                 sides = self.get_sides(guess)
                 for side in sides.values():
-                    if self.is_position_valid(self.target, side):
+                    if board[side[0]][side[1]] in ("O", "F"):
                         return guess
             else:
                 return guess
@@ -133,4 +125,5 @@ class Machine(Player):
     @staticmethod
     def cheat(target, guess):
         print("%sAI Target: %s" % (sets["space"], target.name))
-        print("%sAI Guess: %s\n" % (sets["space"], guess))
+        print("%sAI Guess: %s\n" %
+              (sets["space"], [guess[0] + 1, guess[1] + 1]))

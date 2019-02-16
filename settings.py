@@ -55,6 +55,8 @@ interval = {
 
 
 # Names for AI players and nameless humans
+# TODO: Change name of captains to the top famous pirates
+#  https://sidmeierspirates.fandom.com/wiki/Famous_Pirate
 captains = ["Captain Jack Sparrow",
             "Captain James T. Kirk",
             "Captain Ahab",
@@ -69,17 +71,17 @@ captains = ["Captain Jack Sparrow",
 
 
 # Ship types
-types = [{"ship_type": "Dreadnought", "size": 6, "quantity": 0},
+types = [{"ship_type": "Dreadnought", "size": 6, "quantity": 2},
          {"ship_type": "Destroyer", "size": 5, "quantity": 0},
-         {"ship_type": "Frigate", "size": 4, "quantity": 1},
-         {"ship_type": "Corvette", "size": 3, "quantity": 2},
-         {"ship_type": "PT Boat", "size": 2, "quantity": 1},
+         {"ship_type": "Frigate", "size": 4, "quantity": 2},
+         {"ship_type": "Corvette", "size": 3, "quantity": 0},
+         {"ship_type": "PT Boat", "size": 2, "quantity": 0},
          {"ship_type": "Decoy", "size": 1, "quantity": 2}]
 
 
 # Default settings
 default = {
-    "board": [10, 10],  # Board Size [num of rows, num of cols]
+    "board": [12, 12],  # Board Size [num of rows, num of cols]
     "cheat": True,  # Display other players ships and guesses
     "players": 4,  # Number of players
     "randomize": True,  # Randomize players ships

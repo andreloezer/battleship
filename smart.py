@@ -48,12 +48,9 @@ class SmartGuessing(object):
         self.target = target
         self.hits = [start["position"]]
         self.try_shot = []
-        self.directions = {
-            "up": True,
-            "down": True,
-            "right": True,
-            "left": True
-        }
+        # Each direction: True
+        self.directions = {key: True for key in self.player.sides.keys()}
+        print(self.directions)
         self.try_shot = self.next_shots()
 
     # Get guess
@@ -70,15 +67,11 @@ class SmartGuessing(object):
                 self.directions["left"] = False
         self.try_shot = self.next_shots()
         if self.try_shot:
-            return self.random_shot()
+            # Randomize shot
+            return self.try_shot.pop(randint(0, len(self.try_shot) - 1))
         else:
+            # It's a decoy
             return False
-
-    # Randomize shot from list of guesses
-    def random_shot(self):
-        guess = self.try_shot.pop(randint(0,
-                                          len(self.try_shot) - 1))
-        return guess[0]
 
     # Validate possible guess
     def is_guess_valid(self, guess, direction):
@@ -87,55 +80,31 @@ class SmartGuessing(object):
         row = range(0, sets["board"][0])
         if guess[0] in col and guess[1] in row:
             # Guess in board
-            if board[guess[0]][guess[1]] in ("O", "F"):
-                return True
-            elif board[guess[0]][guess[1]] == "X":
-
+            if board[guess[0]][guess[1]] == "X":
                 # Remove direction
                 self.directions[direction] = False
-                return False
             elif board[guess[0]][guess[1]] == "H":
                 if guess not in self.hits:
+                    # Salvo hit position not registered
                     self.hits.append(guess)
-                return False
             else:
-                return False
-        else:
-            # Position not in board
-            self.directions[direction] = False
+                # Position is "O" or "F"
+                return True
+        return False
 
     # Create possible guesses for each direction
     def next_shots(self):
         shots = []
         for hit in self.hits:
-            if self.directions["up"]:
-                guess = [hit[0] - 1,
-                         hit[1]]
-                if self.is_guess_valid(guess, "up"):
-                    shots.append([guess, "up"])
-
-            if self.directions["down"]:
-                guess = [hit[0] + 1,
-                         hit[1]]
-                if self.is_guess_valid(guess, "down"):
-                    shots.append([guess, "down"])
-
-            if self.directions["left"]:
-                guess = [hit[0],
-                         hit[1] - 1]
-                if self.is_guess_valid(guess, "left"):
-                    shots.append([guess, "left"])
-
-            if self.directions["right"]:
-                guess = [hit[0],
-                         hit[1] + 1]
-                if self.is_guess_valid(guess, "right"):
-                    shots.append([guess, "right"])
-        # It's a decoy
-        if not (self.directions["up"] or
-                self.directions["down"] or
-                self.directions["left"] or
-                self.directions["right"]):
-            return False
+            for direction, boolean in self.directions.items():
+                if boolean:
+                    guess = [hit[0] + self.player.sides[direction][0],
+                             hit[1] + self.player.sides[direction][1]]
+                    if self.is_guess_valid(guess, direction):
+                        shots.append(guess)
+        for direction in self.directions.values():
+            if direction:
+                return shots
         else:
-            return shots
+            # It's a decoy
+            return False
