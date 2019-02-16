@@ -99,8 +99,8 @@ class NewGame(object):
 
             for player in self.players:
                 if player.is_alive:
-                    print("\n\nPlayer %d (%s) Turn\n\n" %
-                          (player.index + 1, player.name))
+                    print("\n\n%s (Player %d) Turn\n\n" %
+                          (player.name, player.index + 1))
                     self.move(player)
 
     # Control the flow of the player
@@ -144,7 +144,7 @@ class NewGame(object):
         if result in ("hits", "eliminates", "sinks"):
             self.move(player, result)
         elif result == "win":
-            self.endgame()
+            self.endgame(player)
 
     # Checking system
 
@@ -238,76 +238,70 @@ class NewGame(object):
     @staticmethod
     def print_result(player, target, result):
         # TODO: Consider using a GUI library
+        print_player = "%s%s%s (Player %d)%s" %\
+                       (sets["space"], Style.BRIGHT, player.name,
+                        player.index + 1, Style.RESET_ALL)
+        print_target = "%s%s (Player %d)%s" %\
+                       (Style.BRIGHT, target.name, target.index + 1,
+                        Style.RESET_ALL)
         if result in ("eliminates", "win"):
-            print("%s%s%s%s sunken the last ship of %s%s%s!" %
-                  (sets["space"], Style.BRIGHT, player.name, Style.RESET_ALL,
-                   Style.BRIGHT, target.name, Style.RESET_ALL))
-            print("%s%s%s%s was %seliminated%s from the game.\n" %
-                  (sets["space"], Style.BRIGHT, target.name,
-                   Style.RESET_ALL, Fore.GREEN, Style.RESET_ALL))
+            print("%s sunken the last ship of %s!" %
+                  (print_player, print_target))
+            print("%s%s was %seliminated%s from the game.\n" %
+                  (sets["space"], print_target, Fore.GREEN, Style.RESET_ALL))
             if result == "win":
-                print("%s%s%s%s is the %swinner%s!!!\n"
-                      % (sets["space"], Style.BRIGHT, player.name,
-                         Style.RESET_ALL, Fore.GREEN, Style.RESET_ALL))
+                print("%s is the %swinner%s!!!\n" %
+                      (print_player, Fore.GREEN, Style.RESET_ALL))
             elif sets["shots"] > 1:
-                print("%s%s%s%s was awarded with a Salvo of %d shots.\n"
-                      % (sets["space"], Style.BRIGHT, player.name,
-                         Style.RESET_ALL, sets["shots"]))
+                print("%s was awarded with a Salvo of %d shots.\n" %
+                      (print_player, sets["shots"]))
         else:
             if result == "hits":
-                print("%s%s%s%s %shits%s something in %s%s%s board.\n"
-                      % (sets["space"], Style.BRIGHT, player.name,
-                         Style.RESET_ALL, Fore.GREEN, Style.RESET_ALL,
-                         Style.BRIGHT, target.name, Style.RESET_ALL))
+                print("%s %shits%s something in %s board.\n" %
+                      (print_player, Fore.GREEN, Style.RESET_ALL, print_target))
             elif result == "already hit":
                 print("%sPosition was already hit.\n"
                       % (sets["space"]))
             elif result == "already guessed":
-                print("%s%s already guessed that position.\n"
-                      % (sets["space"], player.name))
+                print("%s already guessed that position.\n" % print_player)
             elif result == "misses":
-                print("%s%s%s%s %smissed%s the shot.\n"
-                      % (sets["space"], Style.BRIGHT, player.name,
-                         Style.RESET_ALL, Fore.RED, Style.RESET_ALL))
+                print("%s %smissed%s the shot.\n" %
+                      (print_player, Fore.RED, Style.RESET_ALL))
             elif result == "sinks":
-                print("%s%s%s%s %ssunken%s a %s from %s%s%s."
-                      % (sets["space"], Style.BRIGHT, player.name,
-                         Style.RESET_ALL, Fore.GREEN, Style.RESET_ALL,
-                         player.ship, Style.BRIGHT, target.name,
-                         Style.RESET_ALL))
-                print("%s%s%s%s have %d ships left.\n"
-                      % (sets["space"], Style.BRIGHT, target.name,
-                         Style.RESET_ALL, sets["ships"]
-                         - target.ships_sunken))
+                print("%s %ssunken%s a %s from %s." %
+                      (print_player, Fore.GREEN, Style.RESET_ALL,
+                       player.ship, print_target))
+                print("%s have %d ships left.\n" %
+                      (print_player, sets["ships"] - target.ships_sunken))
                 if sets["shots"] > 1:
-                    print("%s%s%s%s was awarded with a Salvo of %d shots.\n"
-                          % (sets["space"], Style.BRIGHT, player.name,
-                             Style.RESET_ALL, sets["shots"]))
+                    print("%s was awarded with a Salvo of %d shots.\n" %
+                          (print_player, sets["shots"]))
                 player.ship = None
         sleep(sets["timeout"])
 
-    @staticmethod
-    def print_score(best_player):
-        # TODO: Transform this function into Game Statistics
-        # TODO: Print the number of rounds
+    def game_statistics(self, best_player, winner):
         offset1 = 15
         offset2 = 35
+        print("\n\n%s Game Statistics %s\n" % ((offset() - 2) * '=',
+                                               (offset() - 1) * '='))
+        print("%s%s (Player %d) has won the game in %d rounds!\n" %
+              (sets["space"], winner.name, winner.index + 1, self.rounds))
         print("%sBests Scores\n" % sets["space"])
         for key, value in best_player.items():
             if key == "accuracy":
                 percent = "%"
             else:
                 percent = ""
-            print("%s%s:%sPlayer %s (%s)%s(%d%s)" %
+            print("%s%s:%s%s (Player %d)%s(%d%s)" %
                   (sets["space"] * 2, key.capitalize(),
-                   (" " * (offset1 - len(key))), value["player"].index + 1,
-                   value["player"].name,
+                   (" " * (offset1 - len(key))), value["player"].name,
+                   value["player"].index + 1,
                    (" " * (offset2 - len(value["player"].name))),
                    value["score"], percent))
         print()
 
     # Game ends
-    def endgame(self):
+    def endgame(self, winner):
         input("\n%sPress Enter to continue..." % sets["space"])
         clear_screen()
         best_player = {
@@ -322,14 +316,10 @@ class NewGame(object):
                 if player.score.score[key] > best_player[key]["score"]:
                     best_player[key]["score"] = player.score.score[key]
                     best_player[key]["player"] = player
-        print("\n\n%s Players Scores %s\n" % ((offset() - 2) * '=',
-                                              (offset() - 2) * '='))
-        self.print_score(best_player)
+        self.game_statistics(best_player, winner)
         input("%sPress Enter to continue..." % sets["space"])
         if sets["scores"]:
             for player in self.players:
-                print("\n%sPlayer %d (%s)\n" %
-                      (sets["space"], player.index + 1, player.name))
-                player.score.print_score()
+                print(player.score)
             input("%sPress Enter to continue..." % sets["space"])
         menu.menu()

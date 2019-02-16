@@ -83,17 +83,22 @@ class Score(object):
         self.score["accuracy"] = self.percentages["accuracy"]
 
     # Print Score
-    def print_score(self):
+    def __str__(self):
         self.evaluate_percentages()
+        score = ""
         offset = 15
-        print("%sTotals" % (sets["space"] * 2))
+        score += "\n%s%s (Player %d)\n" %\
+                 (sets["space"], self.player.name, self.player.index + 1)
+        score += "%sTotals\n" % (sets["space"] * 2)
         for key, value in self.score.items():
-            print("%s%s:%s%d" % (sets["space"] * 3, key.capitalize(),
-                                 (" " * (offset + 6 - len(key) -
-                                  len(str(value)))),
-                                 value))
-        print("\n%sPercentages" % (sets["space"] * 2))
+            score += "%s%s:%s%d\n" %\
+                     (sets["space"] * 3, key.capitalize(),
+                      (" " * (offset + 6 - len(key) - len(str(value)))),
+                      value)
+        score += "\n%sPercentages\n" % (sets["space"] * 2)
         for key, value in self.percentages.items():
-            print("%s%s:%s%5.2f%%" % (sets["space"] * 3, key.capitalize(),
-                                      (" " * (offset - len(key))), value))
-        print()
+            score += "%s%s:%s%5.2f%%\n" %\
+                     (sets["space"] * 3, key.capitalize(),
+                      (" " * (offset - len(key))), value)
+        score += "\n"
+        return score

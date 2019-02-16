@@ -50,7 +50,6 @@ class SmartGuessing(object):
         self.try_shot = []
         # Each direction: True
         self.directions = {key: True for key in self.player.sides.keys()}
-        print(self.directions)
         self.try_shot = self.next_shots()
 
     # Get guess

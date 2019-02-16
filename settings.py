@@ -55,8 +55,6 @@ interval = {
 
 
 # Names for AI players and nameless humans
-# TODO: Change name of captains to the top famous pirates
-#  https://sidmeierspirates.fandom.com/wiki/Famous_Pirate
 captains = ["Henry Morgan",
             "Blackbeard",
             "Captain Kidd",
