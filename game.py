@@ -35,7 +35,7 @@
 
 # Python modules
 from copy import deepcopy
-from random import randint
+from random import shuffle
 from time import sleep
 
 
@@ -71,21 +71,16 @@ class NewGame(object):
                                     offset() * '='))
         # Initialize each Player(class)
         # Human players
-        for player in range(sets["players"] - sets["ai"]):
+        for human in range(sets["players"] - sets["ai"]):
             self.players.append(Human())
         # AI players
-        for player in range(sets["ai"]):
+        for machine in range(sets["ai"]):
             self.players.append(Machine())
         # Randomize players list
-        random_list = []
-        index = 0
-        while len(self.players) > 0:
-            player = self.players.pop(randint(0, len(self.players) - 1))
+        shuffle(self.players)
+        for index, player in enumerate(self.players):
             player.index = index
-            random_list.append(player)
             player.init_ships()
-            index += 1
-        self.players = random_list
         # Loop through turns
         while True:
             self.rounds += 1
@@ -126,8 +121,7 @@ class NewGame(object):
             player.score.add(result)
             # Print result
             self.print_result(player, player.target, result)
-        # Salvo
-        # When status is "sinks" or "eliminates" and sets["shots"] > 1
+        # Salvo status is "sinks" or "eliminates" and sets["shots"] > 1
         else:
             if not player.ai:
                 if sets["cheat"]:

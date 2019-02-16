@@ -145,10 +145,9 @@ class Human(Player):
 
     # Ask player for a guess
     def player_guess(self, hits=False):
+        print("\nTargets board:\n")
         if sets["cheat"]:
-            print("\nTargets board:\n")
-            if sets["cheat"]:
-                self.print_ships(self.target)
+            self.print_ships(self.target)
         print(self.guesses[self.target])
         if hits:
             print("%sYou were awarded with another shot!\n" % sets["space"])
