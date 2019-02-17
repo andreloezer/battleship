@@ -67,11 +67,11 @@ captains = ["Henry Morgan",
 
 
 # Ship types
-types = [{"ship_type": "Dreadnought", "size": 6, "quantity": 2},
+types = [{"ship_type": "Dreadnought", "size": 6, "quantity": 0},
          {"ship_type": "Destroyer", "size": 5, "quantity": 0},
-         {"ship_type": "Frigate", "size": 4, "quantity": 2},
-         {"ship_type": "Corvette", "size": 3, "quantity": 0},
-         {"ship_type": "PT Boat", "size": 2, "quantity": 0},
+         {"ship_type": "Frigate", "size": 4, "quantity": 1},
+         {"ship_type": "Corvette", "size": 3, "quantity": 2},
+         {"ship_type": "PT Boat", "size": 2, "quantity": 2},
          {"ship_type": "Decoy", "size": 1, "quantity": 2}]
 
 
@@ -81,9 +81,9 @@ default = {
     "cheat": True,  # Display other players ships and guesses
     "players": 4,  # Number of players
     "randomize": True,  # Randomize players ships
-    "ai": 4,  # Number of AI players
+    "ai": 3,  # Number of AI players
     "ships": 0,  # Number of valid ships
-    "timeout": 0.01,  # Timeout between moves
+    "timeout": 0.25,  # Timeout between moves
     "smart": True,  # AI smart guessing after a hit
     "decoy": True,  # Decoy doesn't count as a ship
     "space": "  ",  # Indentation of prints

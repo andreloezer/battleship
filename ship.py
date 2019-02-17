@@ -149,33 +149,30 @@ class Ship(object):
         print("%s%s direction: %s"
               % (sets["space"] * 2, self.name, self.direction))
         if self.direction == "horizontal":
-            hor = input_num("%sChoose row" % (sets["space"] * 2),
-                            1, sets["board"][1], "int")
-            ver = input_num("%sChoose starting column" % (sets["space"] * 2),
-                            1, sets["board"][0] - self.size, "int") - 1
-        # When self.direction == "vertical"
-        else:
             ver = input_num("%sChoose col" % (sets["space"] * 2),
-                            1, sets["board"][0] - self.size, "int")
+                            1, sets["board"][0] - self.size + 1, "int") - 2
             hor = input_num("%sChoose starting row" % (sets["space"] * 2),
                             1, sets["board"][1], "int") - 1
+        # When self.direction == "vertical"
+        else:
+            ver = input_num("%sChoose row" % (sets["space"] * 2),
+                            1, sets["board"][1], "int") - 1
+            hor = input_num("%sChoose starting column" % (sets["space"] * 2),
+                            1, sets["board"][0] - self.size + 1, "int") - 2
         ship = self.gen_ship(hor, ver)
         return ship
 
     # Player chooses the ship position
     def ask_position(self):
         print("\n%s%s:" % (sets["space"], self.name))
-        row = input_num("%sChoose %s row"
+        hor = input_num("%sChoose %s row"
                         % (sets["space"], self.name),
-                        1, sets["board"][1], "int")
-        col = input_num("%sChoose %s column"
+                        1, sets["board"][1], "int") - 1
+        ver = input_num("%sChoose %s column"
                         % (sets["space"], self.name),
-                        1, sets["board"][0], "int")
-        position = [row, col]
-        if self.validate(position):
-            return [[True, position]]
-        else:
-            return False
+                        1, sets["board"][0], "int") - 1
+        ship = self.gen_ship(hor, ver)
+        return ship
 
     # Check if position doesn't conflict with other ships
     def validate(self, position):
