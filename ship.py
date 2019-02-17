@@ -185,13 +185,12 @@ class Ship(object):
                         print("\n%sPosition already occupied"
                               % (sets["space"] * 3))
                     return False
-                elif ship_position["coord"] in [[row - 1, col],
-                                                [row + 1, col],
-                                                [row, col - 1],
-                                                [row, col + 1]]:
-                    if not (sets["randomize"] or self.player.ai):
-                        print("\n%sToo close to another ship"
-                              % (sets["space"] * 3))
-                    return False
+                for direction in self.player.sides.values():
+                    side = [row + direction[0], col + direction[1]]
+                    if side == ship_position["coord"]:
+                        if not (sets["randomize"] or self.player.ai):
+                            print("\n%sToo close to another ship"
+                                  % (sets["space"] * 3))
+                        return False
         else:
             return True

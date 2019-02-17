@@ -44,13 +44,6 @@ from smart import SmartGuessing
 
 
 class Machine(Player):
-    sides = {
-        "up": [-1, 0],
-        "down": [1, 0],
-        "left": [0, -1],
-        "right": [0, 1]
-    }
-
     def __init__(self):
         Player.__init__(self)
         self.ai = True
