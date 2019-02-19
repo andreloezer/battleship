@@ -92,3 +92,19 @@ def input_num(message, min_value, max_value, format_type, escape=False):
                 continue
             else:
                 return user_input
+
+
+# Yields tuples (direction, coordinate)
+def get_sides(row=None, col=None):
+    sides = {
+        "up": [-1, 0],
+        "down": [1, 0],
+        "left": [0, -1],
+        "right": [0, 1]
+    }
+    for key, value in sides.items():
+        if (row and col) is not None:
+            side = (key, [row + value[0], col + value[1]])
+        else:
+            side = key
+        yield side

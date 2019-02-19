@@ -37,7 +37,7 @@
 from random import randint
 from colorama import Fore
 from settings import settings as sets
-from functions import input_num
+from functions import input_num, get_sides
 
 
 # Ship Class
@@ -176,6 +176,7 @@ class Ship(object):
 
     # Check if position doesn't conflict with other ships
     def validate(self, position):
+        # TODO: Fix case where 2 ships are touching
         row = position[0]
         col = position[1]
         for ship in self.player.ships:
@@ -185,8 +186,7 @@ class Ship(object):
                         print("\n%sPosition already occupied"
                               % (sets["space"] * 3))
                     return False
-                for direction in self.player.sides.values():
-                    side = [row + direction[0], col + direction[1]]
+                for side in get_sides(row, col):
                     if side == ship_position["coord"]:
                         if not (sets["randomize"] or self.player.ai):
                             print("\n%sToo close to another ship"

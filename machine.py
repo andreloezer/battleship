@@ -39,6 +39,7 @@ from random import randint
 
 # Project modules
 from settings import settings as sets
+from functions import get_sides
 from player import Player
 from smart import SmartGuessing
 
@@ -86,14 +87,15 @@ class Machine(Player):
             guess = self.get_guess()
         return guess
 
-    def get_sides(self, guess):
+    @staticmethod
+    def get_sides(guess):
         sides = {}
-        col = range(0, sets["board"][1])
-        row = range(0, sets["board"][0])
-        for key, value in self.sides.items():
-            position = [value[0] + guess[0], value[1] + guess[1]]
-            if position[0] in col and position[1] in row:
-                sides[key] = position
+        cols = range(0, sets["board"][1])
+        rows = range(0, sets["board"][0])
+        for side in get_sides(guess[0], guess[1]):
+            col, row = side[1][0], side[1][1]
+            if col in cols and row in rows:
+                sides[side[0]] = side[1]
         return sides
 
     # Random guess
@@ -109,7 +111,8 @@ class Machine(Player):
             if sets["decoy"]:
                 sides = self.get_sides(guess)
                 for side in sides.values():
-                    if board[side[0]][side[1]] in ("O", "F"):
+                    col, row = side[0], side[1]
+                    if board[col][row] in ("O", "F"):
                         return guess
             else:
                 return guess

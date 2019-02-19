@@ -39,6 +39,7 @@ from random import randint
 
 # Project module
 from settings import settings as sets
+from functions import get_sides
 
 
 # Guessing around a hit
@@ -49,7 +50,7 @@ class SmartGuessing(object):
         self.hits = [start["position"]]
         self.try_shot = []
         # Each direction: True
-        self.directions = {key: True for key in self.player.sides.keys()}
+        self.directions = {key: True for key in get_sides()}
         self.try_shot = self.next_shots()
 
     # Get guess
@@ -95,10 +96,10 @@ class SmartGuessing(object):
     def next_shots(self):
         shots = []
         for hit in self.hits:
-            for direction, boolean in self.directions.items():
-                if boolean:
-                    guess = [hit[0] + self.player.sides[direction][0],
-                             hit[1] + self.player.sides[direction][1]]
+            row, col = hit[0], hit[1]
+            for direction, side in zip(self.directions, get_sides(row, col)):
+                if self.directions[direction]:
+                    guess = side[1]
                     if self.is_guess_valid(guess, direction):
                         shots.append(guess)
         for direction in self.directions.values():
