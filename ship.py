@@ -176,18 +176,19 @@ class Ship(object):
 
     # Check if position doesn't conflict with other ships
     def validate(self, position):
-        # TODO: Fix case where 2 ships are touching
         row = position[0]
         col = position[1]
         for ship in self.player.ships:
             for ship_position in ship.positions:
+                # Check if is the same position
                 if ship_position["coord"] == [row, col]:
                     if not (sets["randomize"] or self.player.ai):
                         print("\n%sPosition already occupied"
                               % (sets["space"] * 3))
                     return False
+                # Check if side positions conflict with another ship
                 for side in get_sides(row, col):
-                    if side == ship_position["coord"]:
+                    if side[1] == ship_position["coord"]:
                         if not (sets["randomize"] or self.player.ai):
                             print("\n%sToo close to another ship"
                                   % (sets["space"] * 3))
