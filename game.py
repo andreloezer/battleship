@@ -102,8 +102,7 @@ class NewGame(object):
     # TODO: Simplify
     def move(self, player, status="guess"):
         if not player.ai and status == "guess":
-            print("Your board:\n")
-            print(player.guesses[player])
+            player.print_board(player)
         if status == "guess" or not player.target.is_alive:
             player.get_target()
         # Guess
@@ -265,8 +264,9 @@ class NewGame(object):
                 print("%s %ssunken%s a %s from %s." %
                       (print_player, Fore.GREEN, Style.RESET_ALL,
                        player.ship, print_target))
-                print("%s have %d ships left.\n" %
-                      (print_player, sets["ships"] - target.ships_sunken))
+                print("%s%s have %d ships left.\n" %
+                      (sets["space"], print_target,
+                       sets["ships"] - target.ships_sunken))
                 if sets["shots"] > 1:
                     print("%s was awarded with a Salvo of %d shots.\n" %
                           (print_player, sets["shots"]))

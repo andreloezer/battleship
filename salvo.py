@@ -64,7 +64,7 @@ class Salvo(object):
                 else:
                     self.positions = []
                     self.player.get_target()
-                    self.player.guesses[self.player.target].print_board()
+                    self.player.print_board(self.player.target)
                     self.get_shots()
                     return
 
